@@ -1,0 +1,38 @@
+{
+  "name": "nn",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx webpack",
+    "start": "webpack-dev-server --open"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikinty/nn.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mikinty/nn/issues"
+  },
+  "homepage": "https://github.com/mikinty/nn#readme",
+  "devDependencies": {
+    "bufferutil": "^4.0.1",
+    "clean-webpack-plugin": "^3.0.0",
+    "coinbase-pro": "^0.9.0",
+    "css-loader": "^3.5.3",
+    "file-loader": "^6.0.0",
+    "fs": "0.0.1-security",
+    "html-webpack-plugin": "^4.3.0",
+    "jquery": "^3.5.0",
+    "net": "^1.0.2",
+    "style-loader": "^1.2.1",
+    "tls": "0.0.1",
+    "utf-8-validate": "^5.0.2",
+    "webpack": "^4.43.0",
+    "webpack-dev-server": "^3.10.3"
+  }
+}
