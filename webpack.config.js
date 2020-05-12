@@ -2,13 +2,14 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const OUTPUT_PATH = 'build';
 
 module.exports = {
   mode: 'development',
   entry: './src/index.js',
   devtool: 'inline-source-map',
   devServer: {
-      contentBase: './docs'
+      contentBase: './build'
   },
   plugins: [
     new CleanWebpackPlugin(),
@@ -22,7 +23,8 @@ module.exports = {
   ],
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'docs'),
+    path: path.resolve(__dirname, 'build'),
+    publicPath: '/btc-marco/'
   },
   node: {
     fs: "empty"
