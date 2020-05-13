@@ -9,7 +9,8 @@ module.exports = {
   entry: './src/index.js',
   devtool: 'inline-source-map',
   devServer: {
-      contentBase: './build'
+      contentBase: './build',
+      openPage: 'btc-marco/'
   },
   plugins: [
     new CleanWebpackPlugin(),
