@@ -9,8 +9,8 @@ module.exports = {
   entry: './src/index.js',
   devtool: 'inline-source-map',
   devServer: {
-      contentBase: './build',
-      openPage: 'btc-marco/'
+    contentBase: './build',
+    openPage: 'btc-marco/'
   },
   plugins: [
     new CleanWebpackPlugin(),
@@ -32,6 +32,15 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'eslint-loader',
+        options: {
+          cache: true,
+          fix: true
+        }
+      },
       {
         test: /\.s[ac]ss$/i,
         use: [
