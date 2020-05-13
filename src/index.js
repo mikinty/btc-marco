@@ -1,4 +1,4 @@
-import './style.css';
+import './style.scss';
 import { request, get_past_prices, request_again } from './request.js';
 
 const name_text = document.createElement('span');

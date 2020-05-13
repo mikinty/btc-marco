@@ -50,6 +50,7 @@ export function get_past_prices () {
 
         /*** PLOT DATA ***/
         const CHART_WIDTH = 600;
+        const PRICE_WIDTH = CHART_WIDTH*(2/3);
         const CHART_HEIGHT = 400;
         const canvas_wrapper = document.createElement('div');
         canvas_wrapper.classList.add('stock_chart');
@@ -67,9 +68,9 @@ export function get_past_prices () {
         let ctx = canvas.getContext('2d');
 
         ctx.beginPath();
-        ctx.strokeStyle = "#33ECFF";
+        ctx.strokeStyle = CONST.BLUE_LIGHT;
         for (let i = 0; i < mid_price.length; i++) {
-            let curr_x = (i) * (CHART_WIDTH/mid_price.length);
+            let curr_x = (i) * (PRICE_WIDTH/mid_price.length);
             let curr_y = CHART_HEIGHT*(mid_price[i] - CHART_LOW)/CHART_RANGE;
             
             if (i == 0) {
@@ -83,9 +84,9 @@ export function get_past_prices () {
 
         // Draw MA line
         ctx.beginPath();
-        ctx.strokeStyle = "#FFCB33";
+        ctx.strokeStyle = CONST.ORANGE_BITCOIN;
         for (let i = 0; i < moving_average.length; i++) {
-            let curr_x = (i) * (CHART_WIDTH/mid_price.length);
+            let curr_x = (i) * (PRICE_WIDTH/mid_price.length);
             let curr_y = CHART_HEIGHT*(moving_average[i] - CHART_LOW)/CHART_RANGE;
             
             if (i == 0) {
@@ -97,8 +98,79 @@ export function get_past_prices () {
 
         ctx.stroke();
 
+        /*** PREDICT DATA ***/
+        let start_price = mid_price[0];
+        let end_price = mid_price[mid_price.length - 1];
+        let slope = (end_price - start_price)/PRICE_WIDTH;
+
+        // Draw future trendline
+        let curr_x = (mid_price.length-1) * (PRICE_WIDTH/mid_price.length);
+        let curr_y = CHART_HEIGHT*(mid_price[mid_price.length-1] - CHART_LOW)/CHART_RANGE;
+        ctx.beginPath();
+
+        ctx.moveTo(curr_x, curr_y);
+
+        if (slope < 0) {
+            ctx.strokeStyle = CONST.GREEN_SHREK;
+        } else {
+            ctx.strokeStyle = CONST.RED_CHINA;
+        }
+
+        ctx.lineTo(CHART_WIDTH, curr_y + slope*(CHART_WIDTH - PRICE_WIDTH));
+        ctx.stroke();
+
+        // More TA
+        const canvas_wrapper_2 = document.createElement('div');
+        canvas_wrapper_2.classList.add('stock_chart');
+        const canvas_2 = document.createElement('canvas');
+
+        canvas_2.width = CHART_WIDTH;
+        canvas_2.height = CHART_HEIGHT;
+
+        let derivative = [[], []];
+
+        for (let i = 1; i < mid_price.length; i++) {
+            derivative[0].push(
+                (mid_price[i] - mid_price[i-1]) 
+            );
+        }
+
+        for (let i = 1; i < derivative[0].length; i++) {
+            derivative[1].push(
+                (derivative[0][i] - derivative[0][i-1])
+            );
+        }
+
+        // Plot second canvas
+        let ctx_2 = canvas_2.getContext('2d');
+        
+        let colors = [
+            CONST.RED_CHINA,
+            CONST.GREEN_SHREK
+        ]
+        
+        for (let j = 0; j < derivative.length; j++) {
+            ctx_2.beginPath();
+            ctx_2.strokeStyle = colors[j];
+            for (let i = 0; i < derivative[j].length; i++) {
+                let curr_x = (i) * (PRICE_WIDTH/derivative[j].length);
+                let curr_y = CHART_HEIGHT*(derivative[j][i])/(150) + 100;
+                
+                if (i == 0) {
+                    ctx_2.moveTo(curr_x, curr_y);
+                }
+
+                ctx_2.lineTo(curr_x, curr_y);
+            }
+            ctx_2.stroke()
+        }
+
+        
+
         canvas_wrapper.appendChild(canvas);
+        canvas_wrapper_2.appendChild(canvas_2);
         document.body.appendChild(canvas_wrapper);
+        document.body.appendChild(canvas_wrapper_2);
     })
 }
 
