@@ -4,6 +4,7 @@
  */
 
 import *  as CONST from './CONST.js';
+import { is_valid_points } from './lib/contract_lib.js';
 
 /**
  * Chart object to plot curves and keep track of plotting information.
@@ -64,26 +65,20 @@ class Chart {
     return this.canvas.height - ((y - this.context.y_low)/(this.context.y_high - this.context.y_low))*this.canvas.height;
   }
 
-  /** Draws specified points as a curve on a canvas
-   * 
-   *  @param {float[][]} points Points of the curve
-   *  @param {float} start_x x-coordinate of the canvas to start at
-   *  @param {float} end_x x-coordinate of the canvas to end at
-   *  @param {color hex} color Color to draw curve. Defaults to white.
+  /** 
+   * Draws specified points as a curve on a canvas
+   * @param {float[][]} points Points of the curve
+   * @param {float} start_x x-coordinate of the canvas to start at
+   * @param {float} end_x x-coordinate of the canvas to end at
+   * @param {color hex} color Color to draw curve. Defaults to white.
    */
-  plot_curve (points, name, color=CONST.WHITE, line_width = 1) {
+  plot_curve (points, name, color = CONST.WHITE, line_width = 1) {
     if (this.context.x_low == null || this.context.x_high == null || 
         this.context.y_low == null || this.context.y_high == null) {
       throw new Error('Context not init');
     }
 
-    if (points.length != 2) {
-      throw new Error('points does not have x and y coordinates');
-    }
-
-    if (points[0].length != points[1].length) {
-      throw new Error('points has unequal # of x and y coordinates');
-    }
+    is_valid_points(points);
 
     // Save these set of points
     this.curves.set(name, points);
