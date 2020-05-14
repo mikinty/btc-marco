@@ -12,8 +12,9 @@ html, body {
 .main {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
-  padding-top: 10%;
+  height: 10%;
 }
 
 .profile_image {
@@ -46,10 +47,11 @@ html, body {
 }
 
 .stock_chart {
+  height: 45%;
   width: 90%;
-
 }
 
 .stock_chart canvas {
+  height: 100%;
   width: 100%;
 }
