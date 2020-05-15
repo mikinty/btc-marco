@@ -16,6 +16,7 @@ module.exports = {
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       title: 'Scalper',
+      favicon: './images/logo.png'
     }),
     new webpack.ProvidePlugin({
       $: 'jquery',
