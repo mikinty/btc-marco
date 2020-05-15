@@ -20,10 +20,13 @@ export const CHART_HEIGHT = 2160;
 /** Chart padding for top and botom, percentage decimal. */
 export const CHART_PADDING = 0.2;
 export const CHART_WRAPPER_CLASS = 'stock_chart';
+export const CHART_WRAPPER_CLASS_INDICATOR = 'indicator_chart';
 
 /*** COLORS ***/
 export const BLUE_LIGHT = '#33ECFF';
 export const ORANGE_BITCOIN = '#F6921A';
 export const GREEN_SHREK = '#9CDE47';
+export const PURPLE_BARNEY = '#D95A9D';
 export const RED_CHINA = '#DE2910';
+export const YELLOW_BARRY = '#FFF44C';
 export const WHITE = '#FFFFFF';

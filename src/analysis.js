@@ -5,6 +5,7 @@
 
 import { slope, moving_average, exp_moving_average, derivative, local_optima } from './lib/analysis_lib.js';
 import { line_best_fit, calculate_line } from './lib/lib.js';
+import { predict_price } from './lib/prediction_lib.js';
 import * as CONST from './CONST.js';
 
 function draw_trendline (price, chart) {
@@ -141,9 +142,21 @@ export function analysis (data, chart_price, chart_analysis) {
 
   chart_price.plot_line(m, b, 'resistance');
 
-
   /*** PLOT TA on price chart ***/
   draw_trendline(mid_price, chart_price);
   chart_price.plot_curve(price_ma, 'price_ma', CONST.ORANGE_BITCOIN, 3);
   console.log(chart_price.curves);
+
+  /*** PREDICT PRICES ***/
+  let new_prices = predict_price(mid_price, chart_price.context.x_high, null);
+
+  chart_price.plot_curve(new_prices, 'prediction', CONST.PURPLE_BARNEY, 5);
+
+  // Backtesting
+  let new_prices_backtest = predict_price([
+    mid_price[0].slice(0, Math.round(mid_price[0].length*(2/3))),
+    mid_price[1].slice(0, Math.round(mid_price[1].length*(2/3)))
+  ], chart_price.context.x_high, null);
+
+  chart_price.plot_curve(new_prices_backtest, 'prediction', CONST.YELLOW_BARRY, 5);
 }

@@ -10,9 +10,9 @@ import { calculate_line } from './lib/lib.js';
  * Chart object to plot curves and keep track of plotting information.
  */
 class Chart {
-  constructor (width = CONST.CHART_WIDTH, height = CONST.CHART_HEIGHT) {
+  constructor (width = CONST.CHART_WIDTH, height = CONST.CHART_HEIGHT, chart_class = CONST.CHART_WRAPPER_CLASS) {
     this.canvas_wrapper = document.createElement('div');
-    this.canvas_wrapper.classList.add(CONST.CHART_WRAPPER_CLASS);
+    this.canvas_wrapper.classList.add(chart_class);
 
     // Create chart canvas
     this.canvas = document.createElement('canvas');
@@ -132,6 +132,8 @@ class Chart {
     }
 
     is_valid_points(points);
+
+    // TODO: Change the range if necessary
 
     // Save these set of points
     this.curves.set(name, points);
