@@ -5,7 +5,7 @@
 
 import *  as CONST from './CONST.js';
 import { is_valid_points } from './lib/contract_lib.js';
-
+import { calculate_line } from './lib/lib.js';
 /**
  * Chart object to plot curves and keep track of plotting information.
  */
@@ -19,6 +19,15 @@ class Chart {
     this.canvas.width = width;
     this.canvas.height = height;
     this.chart_padding = CONST.CHART_PADDING;
+    this.font_style = 'Lucida Sans';
+    this.font_size = 70;
+    this.font_padding = this.font_size/2;
+    this.axes_padding = 50;
+    this.chart_padding_x_axis = this.font_size + this.axes_padding;
+    this.chart_padding_y_axis = 50;
+    this.chart_padding_y_axis_label = 450;
+
+    this.draw_axes();
 
     /* Defines the bounds of this chart in terms of the data this chart
      * will be plotting. We do this so that we can operate on our data
@@ -39,6 +48,38 @@ class Chart {
     this.canvas_wrapper.appendChild(this.canvas);
   }
 
+  draw_axes () {
+    // Draw axes
+    let ctx = this.canvas.getContext('2d');
+
+    ctx.strokeStyle = CONST.WHITE;
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+    ctx.moveTo(0, this.canvas.height-this.chart_padding_x_axis);
+    ctx.lineTo(this.canvas.width - this.chart_padding_y_axis, this.canvas.height-this.chart_padding_x_axis);
+    ctx.lineTo(this.canvas.width - this.chart_padding_y_axis, 0);
+    ctx.stroke();
+  }
+
+  draw_axes_labels () {
+    if (this.context.x_low == null || this.context.x_high == null || 
+      this.context.y_low == null || this.context.y_high == null) {
+      throw new Error('Context not init');
+    }
+
+    let ctx = this.canvas.getContext('2d');
+
+    ctx.strokeStyle = CONST.WHITE;
+    ctx.fillStyle = CONST.WHITE;
+    ctx.lineWidth = 1;
+    ctx.font = `${this.font_size}px ${this.font_style}`;
+    ctx.fillText(this.context.x_low, 0, this.canvas.height - this.font_padding);
+    ctx.fillText(this.context.x_high, this.canvas.width - this.chart_padding_y_axis - 450, this.canvas.height - this.font_padding);
+    ctx.fillText(this.context.y_high, this.canvas.width - this.chart_padding_y_axis_label + this.axes_padding, this.font_size);
+    ctx.fillText(this.context.y_low, this.canvas.width - this.chart_padding_y_axis_label + this.axes_padding, this.canvas.height - 2*this.font_size);
+  }
+
   /**
    * Sets the data context for this chart so the plotting
    * function knows how to plot points properly. 
@@ -55,14 +96,26 @@ class Chart {
     this.context.x_high = Math.max(...x_list);
     this.context.y_low  = y_low - padding;
     this.context.y_high = y_high + padding;
+
+    this.draw_axes_labels();
   }
 
   get_context_x (x) {
-    return ((x - this.context.x_low)/(this.context.x_high - this.context.x_low))*this.canvas.width;
+    return ((x - this.context.x_low)/(this.context.x_high - this.context.x_low))*(this.canvas.width - this.chart_padding_y_axis);
   }
 
   get_context_y (y) {
-    return this.canvas.height - ((y - this.context.y_low)/(this.context.y_high - this.context.y_low))*this.canvas.height;
+    return this.canvas.height - ((y - this.context.y_low)/(this.context.y_high - this.context.y_low))*(this.canvas.height - this.chart_padding_x_axis) - this.chart_padding_x_axis;
+  }
+
+  plot_line (m, b, name, color = CONST.WHITE, line_width = 3) {
+    let line = [
+      [this.context.x_low, this.context.x_high],
+      [calculate_line(m, b, this.context.x_low), calculate_line(m, b, this.context.x_high)]
+    ];
+
+    // TODO: update with line name
+    this.plot_curve(line, name, color, line_width);
   }
 
   /** 
