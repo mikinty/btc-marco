@@ -40,8 +40,12 @@ async function init () {
 
   chart_price.plot_curve([time_data, price_data], 'price', CONST.BLUE_LIGHT, 5);
 
-  let chart_analysis = new Chart();
+  let chart_analysis = new Chart(CONST.CHART_WIDTH, CONST.CHART_HEIGHT/2, CONST.CHART_WRAPPER_CLASS_INDICATOR);
   document.body.appendChild(chart_analysis.canvas_wrapper);
+
+  // TODO: make better names
+  let chart_indicator = new Chart(CONST.CHART_WIDTH, CONST.CHART_HEIGHT/2, CONST.CHART_WRAPPER_CLASS_INDICATOR);
+  document.body.appendChild(chart_indicator.canvas_wrapper);
 
   analysis(data_response, chart_price, chart_analysis);
 

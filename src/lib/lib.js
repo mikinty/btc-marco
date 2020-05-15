@@ -33,7 +33,10 @@ export function line_best_fit (points) {
   let m = (counter*sum_xy - sum_x*sum_y) / (counter*sum_x2 - sum_x*sum_x);
   let b = (sum_y/counter) - (m*sum_x)/counter;
 
-  console.log (m,b);
-  return [m,b];
+  return [m, b];
 
+}
+
+export function calculate_line (m, b, x) {
+  return m*x + b;
 }
