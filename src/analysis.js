@@ -3,7 +3,7 @@
  * @author mikinty
  */
 
-import { exp_moving_average, support_resistance } from './lib/analysis_lib.js';
+import { exp_moving_average, support_resistance, macd } from './lib/analysis_lib.js';
 import { derivative, local_optima, line_best_fit } from './lib/general_lib.js';
 import { predict_price } from './lib/prediction_lib.js';
 import { Line, Curve } from './obj/graph.js';
@@ -13,7 +13,7 @@ function draw_trendline (price, chart) {
   // Draw future trendline
   let line_trendline = line_best_fit(price);
 
-  chart.plot_line(line_trendline, 'trendline-lobf', (line_trendline.m > 0) ? CONST.GREEN_SHREK : CONST.RED_CHINA, 5);
+  chart.plot_line(line_trendline, 'trendline-lobf', (line_trendline.m > 0) ? CONST.GREEN_SHREK : CONST.RED_CHINA, CONST.LINE_WIDTH_MEDIUM);
 }
 
 /**
@@ -37,7 +37,7 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
   );
 
   // Do technical analysis
-  const MA_WINDOW = 5;
+  const MA_WINDOW = 15;
   let price_ma = new Curve (
     mid_price.x,
     exp_moving_average(mid_price.y, MA_WINDOW)
@@ -51,13 +51,46 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
   ma_dv.push(derivative(price_ma));
   let ma_opt = local_optima(ma_dv[0]);
 
-  let price_ma_12 = new Curve(mid_price.x, exp_moving_average(mid_price.y, 12));
-  let price_ma_26 = new Curve(mid_price.x, exp_moving_average(mid_price.y, 26));
-  
-  chart_analysis.plot_curve(price_ma_12, 'ema_12', CONST.BLUE_LIGHT, 5);
-  chart_analysis.plot_curve(price_ma_26, 'ema_26', CONST.ORANGE_BITCOIN, 5);
+  // MACD
+  const MACD_PERIOD_1 = 12;
+  const MACD_PERIOD_2 = 26;
+  let [
+    macd_diff_y,
+    price_ma_1_y,
+    price_ma_2_y
+  ] = macd(mid_price.y, MACD_PERIOD_1, MACD_PERIOD_2);
 
-  chart_indicator.plot_curve(price_dv[0], 'derivative', CONST.PURPLE_BARNEY, 5);
+  let price_ma_1 = new Curve(mid_price.x, price_ma_1_y);
+  let price_ma_2 = new Curve(mid_price.x, price_ma_2_y);
+  let macd_diff = new Curve(mid_price.x, macd_diff_y);
+  
+  chart_analysis.plot_curve(price_ma_1, `ema_${MACD_PERIOD_1}`, CONST.BLUE_LIGHT, CONST.LINE_WIDTH_MEDIUM);
+  chart_analysis.plot_curve(price_ma_2, `ema_${MACD_PERIOD_2}`, CONST.ORANGE_BITCOIN, CONST.LINE_WIDTH_MEDIUM);
+
+  chart_analysis.set_context({}, 'macd_bar');
+
+  // Separate positive and negative macd diffs
+  let macd_diff_pn = [new Curve(), new Curve()];
+  for (let idx = 0; idx < macd_diff.num_points; idx++) {
+    if (macd_diff.y[idx] >= 0) {
+      macd_diff_pn[0].add_point(
+        macd_diff.x[idx],
+        macd_diff.y[idx]
+      );
+    } else {
+      macd_diff_pn[1].add_point(
+        macd_diff.x[idx],
+        macd_diff.y[idx]
+      );
+    }
+  }
+
+  chart_analysis.plot_curve(macd_diff_pn[0], 'macd_diff_p', CONST.GREEN_SHREK, 3, 0.5, 'macd_bar', CONST.CHART_STYLE_BAR);
+  chart_analysis.plot_curve(macd_diff_pn[1], 'macd_diff_n', CONST.RED_CHINA, 3, 0.5, 'macd_bar', CONST.CHART_STYLE_BAR);
+  chart_analysis.plot_line(new Line(0, 0), 'x_axis', CONST.WHITE, CONST.LINE_WIDTH_THIN, 'macd_bar');
+
+  // Derivative
+  chart_indicator.plot_curve(price_dv[0], 'derivative', CONST.PURPLE_BARNEY, CONST.LINE_WIDTH_MEDIUM);
   chart_indicator.plot_line(new Line(0, 0), 'x_axis');
 
   let [line_support, line_resistance] = support_resistance(mid_price, price_opt);
@@ -67,7 +100,7 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
 
   /*** PLOT TA on price chart ***/
   draw_trendline(mid_price, chart_price);
-  chart_price.plot_curve(price_ma, 'price_ma', CONST.ORANGE_BITCOIN, 3);
+  chart_price.plot_curve(price_ma, 'price_ma', CONST.ORANGE_BITCOIN, CONST.LINE_WIDTH_THICK);
 
   /*** PREDICT PRICES ***/
   let future_date = mid_price.x[mid_price.num_points - 1] + 5000;
@@ -77,6 +110,9 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
   chart_analysis.set_context({
     x_high: future_date
   });
+  chart_analysis.set_context({
+    x_high: future_date
+  }, 'macd_bar');
   chart_indicator.set_context({
     x_high: future_date
   });

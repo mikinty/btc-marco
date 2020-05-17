@@ -115,3 +115,17 @@ export function support_resistance (mid_price, price_opt, num_peaks = 3) {
     line_best_fit(resistance_line)
   ];
 }
+
+export function macd (prices, period_1, period_2) {
+  let ema_1 = exp_moving_average(prices, period_1);
+  let ema_2 = exp_moving_average(prices, period_2);
+  let macd  = [];
+
+  for (let idx = 0; idx < ema_1.length; idx++) {
+    macd.push(
+      ema_1[idx] - ema_2[idx]
+    );
+  }  
+
+  return [macd, ema_1, ema_2];
+}

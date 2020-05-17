@@ -40,8 +40,8 @@ async function init () {
     new Curve(time_data, price_data), 
     'price', 
     CONST.BLUE_LIGHT, 
-    5,
-    0.5
+    CONST.LINE_WIDTH_XXXTRA_THIQQ,
+    0.1
   );
 
   analysis(data_response, chart_price, chart_analysis, chart_indicator);

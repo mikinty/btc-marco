@@ -127,7 +127,9 @@ class Chart {
 
   }
 
-  plot_line (line, name, color = CONST.WHITE, line_width = 3, context = this.context.get(CONTEXT_DEFAULT)) {
+  plot_line (line, name, color = CONST.WHITE, line_width = 3, context_name = CONTEXT_DEFAULT) {
+    let context = this.context.get(context_name);
+
     this.curves.set(
       name,
       {
@@ -150,10 +152,12 @@ class Chart {
    * @param {Context} context The Chart area to plot in
    * @param {float} padding_factor How much padding space to give to the curve
    */
-  plot_curve (curve, name, color = CONST.WHITE, line_width = 1, padding_factor = 0, context = this.context.get(CONTEXT_DEFAULT)) {
+  plot_curve (curve, name, color = CONST.WHITE, line_width = 1, padding_factor = 0, context_name = CONTEXT_DEFAULT, chart_style = CONST.CHART_STYLE_LINE) {
     if (!(curve instanceof Curve)) {
       throw new Error('[Chart, plot_line] points not an instance of Curve');
     }
+
+    let context = this.context.get(context_name);
 
     // TODO: make this update context function
     // Don't have to update context all the time, 
@@ -167,8 +171,7 @@ class Chart {
       
     // We need to initialize the context
     // TODO: a better initialization check
-    if (context.x_low == null || context.x_high == null || 
-        context.y_low == null || context.y_high == null) {
+    if (context.x_low == null || (typeof context.x_low == 'undefined')) {
       context.x_low  = x_low;
       context.x_high = x_high;
       context.y_low  = y_low  - pad_amount;
@@ -205,11 +208,16 @@ class Chart {
         'curve': curve,
         'color': color,
         'line_width': line_width,
-        'context': context 
+        'context': context,
+        'chart_style': chart_style
       }
     );
 
-    this.draw_curve(curve, color, line_width, context);
+    if (chart_style == CONST.CHART_STYLE_BAR) {
+      this.draw_bar(curve, color, line_width, context);
+    } else {
+      this.draw_curve(curve, color, line_width, context);
+    }
   }
 
   draw_line (line, color, line_width, context) {
@@ -254,6 +262,35 @@ class Chart {
     ctx.stroke();
   }
 
+  draw_bar (curve, color = CONST.WHITE, width = 1, context, filled = true) {
+    // Plotting 
+    let ctx = this.canvas.getContext('2d');
+
+    ctx.fillStyle = color;
+
+    for (let idx = 0; idx < curve.num_points; idx++) {
+      // Translate points to this chart object's context
+      let top_corner = [
+        this.get_context_x(context, curve.x[idx]) - width,
+        this.get_context_y(context, Math.max(0, curve.y[idx]))
+      ];
+
+      let width_height = [
+        width*2,
+        this.get_context_y(context, 0) - this.get_context_y(context, Math.abs(curve.y[idx]))
+      ];
+
+      console.log('Math.abs', Math.abs(curve.y[idx]), this.get_context_y(context, Math.abs(curve.y[idx])));
+      console.log('0 translated', this.get_context_y(context, 0));
+
+      if (filled) {
+        ctx.fillRect(top_corner[0], top_corner[1], width_height[0], width_height[1]);
+      } else {
+        ctx.rect(top_corner[0], top_corner[1], width_height[0], width_height[1]);
+      }
+    }
+  }
+
   redraw_chart () {
     // Redraw all the curves, even outside of context
     this.clear_chart();
@@ -261,7 +298,11 @@ class Chart {
       if (value.curve instanceof Line) {
         this.draw_line(value.curve, value.color, value.line_width, value.context);
       } else if (value.curve instanceof Curve) {
-        this.draw_curve(value.curve, value.color, value.line_width, value.context);
+        if (value.chart_style == CONST.CHART_STYLE_BAR) {
+          this.draw_bar(value.curve, value.color, value.line_width, value.context);
+        } else {
+          this.draw_curve(value.curve, value.color, value.line_width, value.context);
+        }
       }
     }
 

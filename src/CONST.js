@@ -23,13 +23,16 @@ export const REFRESH_RATE = 200;
 /*** CHART ***/
 export const CHART_WIDTH  = 4096;
 export const CHART_HEIGHT = 2160;
+export const CHART_STYLE_LINE = 'line';
+export const CHART_STYLE_BAR  = 'bar';
 /** Chart padding for top and botom, percentage decimal. */
 export const CHART_PADDING = 0.2;
 export const CHART_WRAPPER_CLASS = 'stock_chart';
 export const CHART_WRAPPER_CLASS_INDICATOR = 'indicator_chart';
-export const LINE_WIDTH_THIN = 3;
-export const LINE_WIDTH_MEDIUM = 5;
-export const LINE_WIDTH_THICK = 7;
+export const LINE_WIDTH_THIN = 5;
+export const LINE_WIDTH_MEDIUM = 7;
+export const LINE_WIDTH_THICK = 10;
+export const LINE_WIDTH_XXXTRA_THIQQ = 15;
 
 /*** COLORS ***/
 export const BLUE_LIGHT = '#33ECFF';
