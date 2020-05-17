@@ -151,12 +151,4 @@ export function analysis (data, chart_price, chart_analysis) {
   let new_prices = predict_price(mid_price, chart_price.context.x_high, null);
 
   chart_price.plot_curve(new_prices, 'prediction', CONST.PURPLE_BARNEY, 5);
-
-  // Backtesting
-  let new_prices_backtest = predict_price([
-    mid_price[0].slice(0, Math.round(mid_price[0].length*(2/3))),
-    mid_price[1].slice(0, Math.round(mid_price[1].length*(2/3)))
-  ], chart_price.context.x_high, null);
-
-  chart_price.plot_curve(new_prices_backtest, 'prediction', CONST.YELLOW_BARRY, 5);
 }

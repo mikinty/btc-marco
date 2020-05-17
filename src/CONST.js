@@ -7,6 +7,12 @@
 
 /** Ticker we are analyzing */
 export const TICKER = 'BTC-USD';
+/** The base url for all Coinbase API requests */
+const COINBASE_URL = `https:\/\/api.pro.coinbase.com\/products\/`;
+/** Constructs request URLs */
+export const REQUEST_TICKER_URL = (ticker) => `${COINBASE_URL}${ticker}\/ticker`;
+/** Requests past candle data (opening closing prices) */
+export const REQUEST_CANDLE_URL = (ticker) => `${COINBASE_URL}${ticker}\/candles`;
 /** How much price history to look at */
 export const CHART_TIME_HRS = 6;
 /** Granularity for the chart as defined by the Coinbase Pro API */
