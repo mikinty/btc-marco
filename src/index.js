@@ -18,14 +18,18 @@ function component() {
   return element;
 }
 
-document.body.appendChild(component());
-
 /**
  * Initialization for the app. Creates the charts, fetches initial data.
  */
 async function init () {
   let chart_price = new Chart();
   document.body.appendChild(chart_price.canvas_wrapper);
+
+  let chart_analysis = new Chart(CONST.CHART_WIDTH, CONST.CHART_HEIGHT/2, CONST.CHART_WRAPPER_CLASS_INDICATOR);
+  document.body.appendChild(chart_analysis.canvas_wrapper);
+
+  let chart_indicator = new Chart(CONST.CHART_WIDTH, CONST.CHART_HEIGHT/2, CONST.CHART_WRAPPER_CLASS_INDICATOR);
+  document.body.appendChild(chart_indicator.canvas_wrapper);
 
   // Draws the charts
   let data_response = await get_past_prices();
@@ -41,17 +45,11 @@ async function init () {
 
   chart_price.plot_curve(new Curve(time_data, price_data), 'price', CONST.BLUE_LIGHT, 5);
 
-  let chart_analysis = new Chart(CONST.CHART_WIDTH, CONST.CHART_HEIGHT/2, CONST.CHART_WRAPPER_CLASS_INDICATOR);
-  document.body.appendChild(chart_analysis.canvas_wrapper);
-
-  // TODO: make better names
-  let chart_indicator = new Chart(CONST.CHART_WIDTH, CONST.CHART_HEIGHT/2, CONST.CHART_WRAPPER_CLASS_INDICATOR);
-  document.body.appendChild(chart_indicator.canvas_wrapper);
-
   analysis(data_response, chart_price, chart_analysis);
 
   // Kicks off price fetching
   request_again(name_text);
 }
 
+document.body.appendChild(component());
 init();
