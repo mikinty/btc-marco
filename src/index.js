@@ -36,14 +36,13 @@ async function init () {
   let price_data = data_response.map(elem => (elem[1] + elem[2])/2);
   let time_data = data_response.map(elem => elem[0]);
 
-  chart_price.set_context(
-    time_data,
-    price_data
+  chart_price.plot_curve(
+    new Curve(time_data, price_data), 
+    'price', 
+    CONST.BLUE_LIGHT, 
+    5,
+    0.5
   );
-
-  chart_price.context.x_high += 0.5*(chart_price.context.x_high - chart_price.context.x_low);
-
-  chart_price.plot_curve(new Curve(time_data, price_data), 'price', CONST.BLUE_LIGHT, 5);
 
   analysis(data_response, chart_price, chart_analysis, chart_indicator);
 

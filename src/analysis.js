@@ -53,28 +53,12 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
 
   let price_ma_12 = new Curve(mid_price.x, exp_moving_average(mid_price.y, 12));
   let price_ma_26 = new Curve(mid_price.x, exp_moving_average(mid_price.y, 26));
-
-  chart_analysis.set_context(
-    price_ma_12.x,
-    price_ma_12.y
-  );
-
-  chart_analysis.context.x_low  = chart_price.context.x_low;
-  chart_analysis.context.x_high = chart_price.context.x_high;
   
   chart_analysis.plot_curve(price_ma_12, 'ema_12', CONST.BLUE_LIGHT, 5);
   chart_analysis.plot_curve(price_ma_26, 'ema_26', CONST.ORANGE_BITCOIN, 5);
 
-  chart_indicator.set_context(
-    price_dv[0].x,
-    price_dv[0].y
-  );
-
-  chart_indicator.context.x_low  = chart_price.context.x_low;
-  chart_indicator.context.x_high = chart_price.context.x_high;
-
-  chart_indicator.plot_line(new Line(0, 0), 'x_axis');
   chart_indicator.plot_curve(price_dv[0], 'derivative', CONST.PURPLE_BARNEY, 5);
+  chart_indicator.plot_line(new Line(0, 0), 'x_axis');
 
   let [line_support, line_resistance] = support_resistance(mid_price, price_opt);
   
@@ -86,7 +70,17 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
   chart_price.plot_curve(price_ma, 'price_ma', CONST.ORANGE_BITCOIN, 3);
 
   /*** PREDICT PRICES ***/
-  let new_prices = predict_price(mid_price, chart_price.context.x_high, null);
+  let future_date = mid_price.x[mid_price.num_points - 1] + 5000;
+  chart_price.set_context({
+    x_high: future_date
+  });
+  chart_analysis.set_context({
+    x_high: future_date
+  });
+  chart_indicator.set_context({
+    x_high: future_date
+  });
 
+  let new_prices = predict_price(mid_price, future_date, null);
   chart_price.plot_curve(new_prices, 'prediction', CONST.PURPLE_BARNEY, 5);
 }
