@@ -21,7 +21,7 @@ function draw_trendline (price, chart) {
  * @param {*} data The data to analyze, formatted as
  * [ time, low, high, open, close, volume ]
  */
-export function analysis (data, chart_price, chart_analysis) {
+export function analysis (data, chart_price, chart_analysis, chart_indicator) {
   const LOW_IDX = 1;
   const HIGH_IDX = 2;
 
@@ -51,16 +51,30 @@ export function analysis (data, chart_price, chart_analysis) {
   ma_dv.push(derivative(price_ma));
   let ma_opt = local_optima(ma_dv[0]);
 
+  let price_ma_12 = new Curve(mid_price.x, exp_moving_average(mid_price.y, 12));
+  let price_ma_26 = new Curve(mid_price.x, exp_moving_average(mid_price.y, 26));
+
   chart_analysis.set_context(
-    ma_dv[0].x,
-    ma_dv[0].y,
+    price_ma_12.x,
+    price_ma_12.y
   );
 
   chart_analysis.context.x_low  = chart_price.context.x_low;
   chart_analysis.context.x_high = chart_price.context.x_high;
+  
+  chart_analysis.plot_curve(price_ma_12, 'ema_12', CONST.BLUE_LIGHT, 5);
+  chart_analysis.plot_curve(price_ma_26, 'ema_26', CONST.ORANGE_BITCOIN, 5);
 
-  chart_analysis.plot_line(new Line(0, 0), 'x_axis');
-  chart_analysis.plot_curve(ma_dv[0], 'derivative', CONST.ORANGE_BITCOIN, 5);
+  chart_indicator.set_context(
+    price_dv[0].x,
+    price_dv[0].y
+  );
+
+  chart_indicator.context.x_low  = chart_price.context.x_low;
+  chart_indicator.context.x_high = chart_price.context.x_high;
+
+  chart_indicator.plot_line(new Line(0, 0), 'x_axis');
+  chart_indicator.plot_curve(price_dv[0], 'derivative', CONST.PURPLE_BARNEY, 5);
 
   let [line_support, line_resistance] = support_resistance(mid_price, price_opt);
   

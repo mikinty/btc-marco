@@ -45,7 +45,7 @@ async function init () {
 
   chart_price.plot_curve(new Curve(time_data, price_data), 'price', CONST.BLUE_LIGHT, 5);
 
-  analysis(data_response, chart_price, chart_analysis);
+  analysis(data_response, chart_price, chart_analysis, chart_indicator);
 
   // Kicks off price fetching
   request_again(name_text);
