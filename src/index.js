@@ -1,7 +1,7 @@
 import './style.scss';
 import { get_past_prices, request_again } from './request.js';
 import { analysis } from './analysis.js';
-import { Chart } from './chart.js';
+import { Chart } from './obj/chart.js';
 import * as CONST from './CONST.js';
 
 const name_text = document.createElement('span');

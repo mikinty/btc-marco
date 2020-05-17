@@ -3,9 +3,10 @@
  * @author mikinty
  */
 
-import *  as CONST from './CONST.js';
-import { is_valid_points } from './lib/contract_lib.js';
-import { calculate_line } from './lib/lib.js';
+import *  as CONST from '../CONST.js';
+import { is_valid_points } from '../lib/contract_lib.js';
+import { calculate_line } from '../lib/lib.js';
+
 /**
  * Chart object to plot curves and keep track of plotting information.
  */
