@@ -27,6 +27,9 @@ export const CHART_HEIGHT = 2160;
 export const CHART_PADDING = 0.2;
 export const CHART_WRAPPER_CLASS = 'stock_chart';
 export const CHART_WRAPPER_CLASS_INDICATOR = 'indicator_chart';
+export const LINE_WIDTH_THIN = 3;
+export const LINE_WIDTH_MEDIUM = 5;
+export const LINE_WIDTH_THICK = 7;
 
 /*** COLORS ***/
 export const BLUE_LIGHT = '#33ECFF';

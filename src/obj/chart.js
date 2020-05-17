@@ -5,7 +5,7 @@
 
 import *  as CONST from '../CONST.js';
 import { is_valid_points } from '../lib/contract_lib.js';
-import { calculate_line } from '../lib/lib.js';
+import { Curve } from './graph.js';
 
 /**
  * Chart object to plot curves and keep track of plotting information.
@@ -109,14 +109,14 @@ class Chart {
     return this.canvas.height - ((y - this.context.y_low)/(this.context.y_high - this.context.y_low))*(this.canvas.height - this.chart_padding_x_axis) - this.chart_padding_x_axis;
   }
 
-  plot_line (m, b, name, color = CONST.WHITE, line_width = 3) {
-    let line = [
+  plot_line (line, name, color = CONST.WHITE, line_width = 3) {
+    let curve = new Curve (
       [this.context.x_low, this.context.x_high],
-      [calculate_line(m, b, this.context.x_low), calculate_line(m, b, this.context.x_high)]
-    ];
+      [line.compute_y(this.context.x_low), line.compute_y(this.context.x_high)]
+    );
 
     // TODO: update with line name
-    this.plot_curve(line, name, color, line_width);
+    this.plot_curve(curve, name, color, line_width);
   }
 
   /** 
@@ -126,18 +126,20 @@ class Chart {
    * @param {float} end_x x-coordinate of the canvas to end at
    * @param {color hex} color Color to draw curve. Defaults to white.
    */
-  plot_curve (points, name, color = CONST.WHITE, line_width = 1) {
+  plot_curve (curve, name, color = CONST.WHITE, line_width = 1) {
     if (this.context.x_low == null || this.context.x_high == null || 
         this.context.y_low == null || this.context.y_high == null) {
       throw new Error('Context not init');
     }
 
-    is_valid_points(points);
+    if (!(curve instanceof Curve)) {
+      throw new Error('[Chart, plot_line] points not an instance of Curve');
+    }
 
     // TODO: Change the range if necessary
 
-    // Save these set of points
-    this.curves.set(name, points);
+    // Save this curve
+    this.curves.set(name, curve);
 
     // Plotting 
     let ctx = this.canvas.getContext('2d');
@@ -146,10 +148,10 @@ class Chart {
     ctx.strokeStyle = color;
     ctx.lineWidth = line_width;
 
-    for (let idx = 0; idx < points[0].length; idx++) {
+    for (let idx = 0; idx < curve.num_points; idx++) {
       // Translate points to this chart object's context
-      let curr_x = this.get_context_x(points[0][idx]);
-      let curr_y = this.get_context_y(points[1][idx]);
+      let curr_x = this.get_context_x(curve.x[idx]);
+      let curr_y = this.get_context_y(curve.y[idx]);
 
       if (idx == 0) {
         ctx.moveTo(curr_x, curr_y);

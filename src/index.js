@@ -2,6 +2,7 @@ import './style.scss';
 import { get_past_prices, request_again } from './request.js';
 import { analysis } from './analysis.js';
 import { Chart } from './obj/chart.js';
+import { Curve } from './obj/graph.js';
 import * as CONST from './CONST.js';
 
 const name_text = document.createElement('span');
@@ -38,7 +39,7 @@ async function init () {
 
   chart_price.context.x_high += 0.5*(chart_price.context.x_high - chart_price.context.x_low);
 
-  chart_price.plot_curve([time_data, price_data], 'price', CONST.BLUE_LIGHT, 5);
+  chart_price.plot_curve(new Curve(time_data, price_data), 'price', CONST.BLUE_LIGHT, 5);
 
   let chart_analysis = new Chart(CONST.CHART_WIDTH, CONST.CHART_HEIGHT/2, CONST.CHART_WRAPPER_CLASS_INDICATOR);
   document.body.appendChild(chart_analysis.canvas_wrapper);
