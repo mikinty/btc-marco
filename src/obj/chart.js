@@ -13,7 +13,12 @@ const CONTEXT_DEFAULT = 'default';
  * Chart object to plot curves and keep track of plotting information.
  */
 class Chart {
-  constructor (width = CONST.CHART_WIDTH, height = CONST.CHART_HEIGHT, chart_class = CONST.CHART_WRAPPER_CLASS) {
+  constructor (
+    width = CONST.CHART_WIDTH, 
+    height = CONST.CHART_HEIGHT, 
+    chart_class = CONST.CHART_WRAPPER_CLASS,
+    show_axes = false
+  ) {
     this.canvas_wrapper = document.createElement('div');
     this.canvas_wrapper.classList.add(chart_class);
 
@@ -29,6 +34,7 @@ class Chart {
     this.chart_padding_x_axis = this.font_size + this.axes_padding;
     this.chart_padding_y_axis = 50;
     this.chart_padding_y_axis_label = 450;
+    this.show_axes = show_axes;
 
     /* Defines the bounds of this chart in terms of the data this chart
      * will be plotting. We do this so that we can operate on our data
@@ -70,6 +76,8 @@ class Chart {
     ctx.lineTo(this.canvas.width - this.chart_padding_y_axis, this.canvas.height-this.chart_padding_x_axis);
     ctx.lineTo(this.canvas.width - this.chart_padding_y_axis, 0);
     ctx.stroke();
+
+    this.draw_axes_labels();
   }
 
   draw_axes_labels (context = this.context.get(CONTEXT_DEFAULT)) {
@@ -84,10 +92,43 @@ class Chart {
     ctx.fillStyle = CONST.WHITE;
     ctx.lineWidth = 1;
     ctx.font = `${this.font_size}px ${this.font_style}`;
-    ctx.fillText(context.x_low, 0, this.canvas.height - this.font_padding);
-    ctx.fillText(context.x_high, this.canvas.width - this.chart_padding_y_axis - 450, this.canvas.height - this.font_padding);
-    ctx.fillText(context.y_high, this.canvas.width - this.chart_padding_y_axis_label + this.axes_padding, this.font_size);
-    ctx.fillText(context.y_low, this.canvas.width - this.chart_padding_y_axis_label + this.axes_padding, this.canvas.height - 2*this.font_size);
+
+    /**
+     * Converts a raw UTC seconds to a date in hours:minutes format
+     * @param {int} utc Seconds in UTC 
+     */
+    let convert_UTC_to_HM = (utc) => {
+      let date = new Date(0);
+      date.setUTCSeconds(utc);
+
+      let pad_front = (num) => (num < 10) ? `0${num}` : `${num}`;
+
+      return `${pad_front(date.getHours())}:${pad_front(date.getMinutes())}`;
+    };
+
+    ctx.fillText (
+      convert_UTC_to_HM(context.x_low),
+      0, 
+      this.canvas.height - this.font_padding
+    );
+
+    ctx.fillText (
+      convert_UTC_to_HM(context.x_high),
+      this.canvas.width - this.chart_padding_y_axis - 200, 
+      this.canvas.height - this.font_padding
+    );
+
+    ctx.fillText (
+      Math.round(context.y_low), 
+      this.canvas.width - this.chart_padding_y_axis_label + 4*this.axes_padding, 
+      this.canvas.height - 2*this.font_size
+    );
+
+    ctx.fillText (
+      Math.round(context.y_high), 
+      this.canvas.width - this.chart_padding_y_axis_label + 4*this.axes_padding, 
+      this.font_size
+    );
   }
 
   get_context_x (context, x) {
@@ -176,8 +217,10 @@ class Chart {
       context.x_high = x_high;
       context.y_low  = y_low  - pad_amount;
       context.y_high = y_high + pad_amount;
-      this.draw_axes_labels();
-      this.draw_axes();
+
+      if (this.show_axes) {
+        this.draw_axes();
+      }
     }
     // Change the range if necessary
     if (context.x_low > x_low) {
@@ -280,9 +323,6 @@ class Chart {
         this.get_context_y(context, 0) - this.get_context_y(context, Math.abs(curve.y[idx]))
       ];
 
-      console.log('Math.abs', Math.abs(curve.y[idx]), this.get_context_y(context, Math.abs(curve.y[idx])));
-      console.log('0 translated', this.get_context_y(context, 0));
-
       if (filled) {
         ctx.fillRect(top_corner[0], top_corner[1], width_height[0], width_height[1]);
       } else {
@@ -306,8 +346,9 @@ class Chart {
       }
     }
 
-    this.draw_axes_labels();
-    this.draw_axes();
+    if (this.show_axes) {
+      this.draw_axes();
+    }
   }
 }
 
