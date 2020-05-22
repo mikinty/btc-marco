@@ -3,40 +3,25 @@
  * @author mikinty
  */
 
-import { slope, moving_average, exp_moving_average, derivative, local_optima } from './lib/analysis_lib.js';
-import { line_best_fit, calculate_line } from './lib/lib.js';
+import { exp_moving_average, support_resistance, macd } from './lib/analysis_lib.js';
+import { derivative, local_optima, line_best_fit } from './lib/general_lib.js';
 import { predict_price } from './lib/prediction_lib.js';
+import { Line, Curve } from './obj/graph.js';
 import * as CONST from './CONST.js';
 
 function draw_trendline (price, chart) {
   // Draw future trendline
-  let mb = line_best_fit(price);
+  let line_trendline = line_best_fit(price);
 
-  let price_slope = slope(price, 0, price[0].length-1);
-
-  let trend_y = price[1][0] + price_slope*(chart.context.x_high - price[0][0]);
-
-  let points = [
-    [price[0][0], chart.context.x_high],
-    [price[1][0], trend_y]
-  ];
-
-  let lobf = [
-    [price[0][0], chart.context.x_high],
-    [calculate_line(mb[0], mb[1], price[0][0]), calculate_line(mb[0], mb[1], chart.context.x_high)]
-  ];
-
-  chart.plot_curve(points, 'trendline', (price_slope > 0) ? CONST.GREEN_SHREK : CONST.RED_CHINA, 5);
-  chart.plot_curve(lobf, 'trendline-lobf', (mb[0] > 0) ? CONST.GREEN_SHREK : CONST.RED_CHINA, 5);
+  chart.plot_line(line_trendline, 'trendline-lobf', (line_trendline.m > 0) ? CONST.GREEN_SHREK : CONST.RED_CHINA, CONST.LINE_WIDTH_MEDIUM);
 }
 
 /**
  * Performs a suite of analysis functions
- * @param {*} data The data to analyze
+ * @param {*} data The data to analyze, formatted as
+ * [ time, low, high, open, close, volume ]
  */
-export function analysis (data, chart_price, chart_analysis) {
-  // Data looks like
-  // [ time, low, high, open, close, volume ]
+export function analysis (data, chart_price, chart_analysis, chart_indicator) {
   const LOW_IDX = 1;
   const HIGH_IDX = 2;
 
@@ -44,16 +29,19 @@ export function analysis (data, chart_price, chart_analysis) {
    * x: time
    * y: mid price = (high + low)/2
    */
-  let mid_price = data.map(elem => [elem[0], (elem[HIGH_IDX]+elem[LOW_IDX])/2]);
-  mid_price.sort((a, b) => a[0] - b[0]);
-  mid_price = [
-    mid_price.map(e => e[0]),
-    mid_price.map(e => e[1])
-  ];
+  let mid_price_raw = data.map(elem => [elem[0], (elem[HIGH_IDX]+elem[LOW_IDX])/2]);
+  mid_price_raw.sort((a, b) => a[0] - b[0]);
+  let mid_price = new Curve (
+    mid_price_raw.map(e => e[0]),
+    mid_price_raw.map(e => e[1])
+  );
 
   // Do technical analysis
-  const MA_WINDOW = 5;
-  let price_ma = [mid_price[0], exp_moving_average(mid_price[1], MA_WINDOW)];
+  const MA_WINDOW = 15;
+  let price_ma = new Curve (
+    mid_price.x,
+    exp_moving_average(mid_price.y, MA_WINDOW)
+  );
 
   // More TA
   let price_dv = [];
@@ -63,100 +51,72 @@ export function analysis (data, chart_price, chart_analysis) {
   ma_dv.push(derivative(price_ma));
   let ma_opt = local_optima(ma_dv[0]);
 
-  chart_analysis.set_context(
-    ma_dv[0][0],
-    ma_dv[0][1],
-  );
+  // MACD
+  const MACD_PERIOD_1 = 12;
+  const MACD_PERIOD_2 = 26;
+  let [
+    macd_diff_y,
+    price_ma_1_y,
+    price_ma_2_y
+  ] = macd(mid_price.y, MACD_PERIOD_1, MACD_PERIOD_2);
 
-  chart_analysis.context.x_low  = chart_price.context.x_low;
-  chart_analysis.context.x_high = chart_price.context.x_high;
+  let price_ma_1 = new Curve(mid_price.x, price_ma_1_y);
+  let price_ma_2 = new Curve(mid_price.x, price_ma_2_y);
+  let macd_diff = new Curve(mid_price.x, macd_diff_y);
+  
+  chart_analysis.plot_curve(price_ma_1, `ema_${MACD_PERIOD_1}`, CONST.BLUE_LIGHT, CONST.LINE_WIDTH_MEDIUM);
+  chart_analysis.plot_curve(price_ma_2, `ema_${MACD_PERIOD_2}`, CONST.ORANGE_BITCOIN, CONST.LINE_WIDTH_MEDIUM);
 
-  chart_analysis.plot_curve([[chart_analysis.context.x_low, chart_analysis.context.x_high], [0, 0]], 'axis_zero', CONST.WHITE, 2);
-  chart_analysis.plot_curve(ma_dv[0], 'derivative', CONST.ORANGE_BITCOIN, 5);
+  chart_analysis.set_context({}, 'macd_bar');
 
-  for (let idx = 0; idx < price_opt[0].length; idx++) {
-    let curr_x = price_opt[0][idx];
-
-    // chart_price.plot_curve([[curr_x, curr_x], [chart_price.context.y_low, chart_price.context.y_high]], 'local_min', CONST.RED_CHINA, 2);
-  }
-
-  for (let idx = 0; idx < price_opt[1].length; idx++) {
-    let curr_x = price_opt[1][idx];
-
-    // chart_price.plot_curve([[curr_x, curr_x], [chart_price.context.y_low, chart_price.context.y_high]], 'local_min', CONST.GREEN_SHREK, 2);
-  }
-
-  let num_support = 3;
-  let la_opt = [];
-
-  // Find support
-  for (let idx = 0; idx < mid_price[0].length; idx++) {
-    let curr_x = mid_price[0][idx];
-
-    if (price_opt[0].includes(curr_x)) {
-      // chart_price.plot_curve([[curr_x, curr_x], [chart_price.context.y_low, chart_price.context.y_high]], 'local_min', CONST.RED_CHINA, 5);
-      la_opt.push([curr_x, mid_price[1][idx]]);
+  // Separate positive and negative macd diffs
+  let macd_diff_pn = [new Curve(), new Curve()];
+  for (let idx = 0; idx < macd_diff.num_points; idx++) {
+    if (macd_diff.y[idx] >= 0) {
+      macd_diff_pn[0].add_point(
+        macd_diff.x[idx],
+        macd_diff.y[idx]
+      );
+    } else {
+      macd_diff_pn[1].add_point(
+        macd_diff.x[idx],
+        macd_diff.y[idx]
+      );
     }
   }
 
-  la_opt.sort((a, b) => a[1] - b[1]);
+  chart_analysis.plot_curve(macd_diff_pn[0], 'macd_diff_p', CONST.GREEN_SHREK, 3, 0.5, 'macd_bar', CONST.CHART_STYLE_BAR);
+  chart_analysis.plot_curve(macd_diff_pn[1], 'macd_diff_n', CONST.RED_CHINA, 3, 0.5, 'macd_bar', CONST.CHART_STYLE_BAR);
+  chart_analysis.plot_line(new Line(0, 0), 'x_axis', CONST.WHITE, CONST.LINE_WIDTH_THIN, 'macd_bar');
 
-  let support_line = [[], []];
+  // Derivative
+  chart_indicator.plot_curve(price_dv[0], 'derivative', CONST.PURPLE_BARNEY, CONST.LINE_WIDTH_MEDIUM);
+  chart_indicator.plot_line(new Line(0, 0), 'x_axis');
 
-  for (let idx = 0; idx < num_support; idx ++) {
-    support_line[0].push(la_opt[idx][0]);
-    support_line[1].push(la_opt[idx][1]);
-  }
-
-  let mb = line_best_fit(support_line);
-
-  let m = mb[0];
-  let b = mb[1];
-
-  chart_price.plot_line(m, b, 'support');
-
-  la_opt = [];
-  // Find support
-  for (let idx = 0; idx < mid_price[0].length; idx++) {
-    let curr_x = mid_price[0][idx];
-
-    if (price_opt[1].includes(curr_x)) {
-      // chart_price.plot_curve([[curr_x, curr_x], [chart_price.context.y_low, chart_price.context.y_high]], 'local_min', CONST.GREEN_SHREK, 5);
-      la_opt.push([curr_x, mid_price[1][idx]]);
-    }
-  }
-
-  la_opt.sort((a, b) => b[1] - a[1]);
-
-  let resistance_line = [[], []];
-
-  for (let idx = 0; idx < num_support; idx ++) {
-    resistance_line[0].push(la_opt[idx][0]);
-    resistance_line[1].push(la_opt[idx][1]);
-  }
-
-  mb = line_best_fit(resistance_line);
-
-  m = mb[0];
-  b = mb[1];
-
-  chart_price.plot_line(m, b, 'resistance');
+  let [line_support, line_resistance] = support_resistance(mid_price, price_opt);
+  
+  chart_price.plot_line(line_support, 'support');
+  chart_price.plot_line(line_resistance, 'resistance');
 
   /*** PLOT TA on price chart ***/
   draw_trendline(mid_price, chart_price);
-  chart_price.plot_curve(price_ma, 'price_ma', CONST.ORANGE_BITCOIN, 3);
-  console.log(chart_price.curves);
+  chart_price.plot_curve(price_ma, 'price_ma', CONST.ORANGE_BITCOIN, CONST.LINE_WIDTH_THICK);
 
   /*** PREDICT PRICES ***/
-  let new_prices = predict_price(mid_price, chart_price.context.x_high, null);
+  let future_date = mid_price.x[mid_price.num_points - 1] + 5000;
+  chart_price.set_context({
+    x_high: future_date
+  });
+  chart_analysis.set_context({
+    x_high: future_date
+  });
+  chart_analysis.set_context({
+    x_high: future_date
+  }, 'macd_bar');
+  chart_indicator.set_context({
+    x_high: future_date
+  });
 
+  let new_prices = predict_price(mid_price, future_date, null);
   chart_price.plot_curve(new_prices, 'prediction', CONST.PURPLE_BARNEY, 5);
-
-  // Backtesting
-  let new_prices_backtest = predict_price([
-    mid_price[0].slice(0, Math.round(mid_price[0].length*(2/3))),
-    mid_price[1].slice(0, Math.round(mid_price[1].length*(2/3)))
-  ], chart_price.context.x_high, null);
-
-  chart_price.plot_curve(new_prices_backtest, 'prediction', CONST.YELLOW_BARRY, 5);
 }

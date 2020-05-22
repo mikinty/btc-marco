@@ -3,22 +3,23 @@
  * @author mikinty
  */
 
-import { line_best_fit } from './lib.js';
+import { line_best_fit } from './general_lib.js';
 import * as CONST from '../CONST.js';
+import { Curve } from '../obj/graph.js';
 
 export function predict_price (prices, end_time, input, noise = 15) {
   let new_prices = [[], []];
-  let num_points = prices[0].length;
+  let num_points = prices.num_points;
   let past_ratio = 1/2;
 
-  let last_third = [
-    prices[0].slice(Math.round(num_points * past_ratio), num_points-1),
-    prices[1].slice(Math.round(num_points * past_ratio), num_points-1)
-  ];
+  let last_third = new Curve(
+    prices.x.slice(Math.round(num_points * past_ratio), num_points-1),
+    prices.y.slice(Math.round(num_points * past_ratio), num_points-1)
+  );
 
   let line_best = line_best_fit(last_third);
   
-  let start_point = [prices[0][num_points - 1], prices[1][num_points - 1]];
+  let start_point = [prices.x[num_points - 1], prices.y[num_points - 1]];
   let curr_y = start_point[1];
 
   // Generate new points
@@ -32,8 +33,11 @@ export function predict_price (prices, end_time, input, noise = 15) {
     );
 
     // Calculate new point
-    curr_y += line_best[0] * CONST.GRANULARITY + noise*(Math.random() - 0.5);
+    curr_y += line_best.m * CONST.GRANULARITY + noise*(Math.random() - 0.5);
   }
 
-  return new_prices; 
+  return new Curve (
+    new_prices[0],
+    new_prices[1]
+  );
 }
