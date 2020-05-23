@@ -3,7 +3,7 @@
  * @author mikinty
  */
 
-import { line_best_fit } from './general_lib.js';
+import { line_best_fit, std } from './general_lib.js';
 import { Curve } from '../obj/graph.js';
 
 /**
@@ -128,4 +128,42 @@ export function macd (prices, period_1, period_2) {
   }  
 
   return [macd, ema_1, ema_2];
+}
+
+/**
+ * Finds the upper and lower bollinger bands of a price curve, given a simple moving average.
+ * 
+ * @param {float[]} MA The simple moving average
+ * @param {int} n The number of days in the smoothing period, usually 20
+ * @param {int} m The number of standard deviations, usually 2
+ * @param {float[]} sigma standard deviation over last n periods of TP
+ * 
+ * @returns [
+ * @param {float[]} UBOL The upper Bollinger Band
+ * @param {float[]} LBOL The lower Bollinger Band
+ * ]
+ */
+export function BG_bands (n, m) {
+
+  // Calculate the typical price, TP
+  let TP = [];
+   
+  for (let idx = 0; idx < MA.num_points; idx++) {
+    TP.push((High + Low + Close)/3); // Typical price [(High + Low + Close)/3]
+  }
+
+  // Find the standard deviation over the last n periods of TP
+
+  let sigma = std(TP);
+  let MA = moving_average(TP, n);
+
+  // Now calculate the upper and lower Bollinger Bands
+  let UBOL = new Curve();
+  let LBOL = new Curve();
+
+  for (let idx = 0; idx < MA.num_points; idx++) {
+    UBOL.y.push(MA[idx] + m*sigma);
+    LBOL.y.push(MA[idx] - m*sigma);
+  }
+  return [UBOL, LBOL];
 }
