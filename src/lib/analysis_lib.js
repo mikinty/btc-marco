@@ -3,7 +3,7 @@
  * @author mikinty
  */
 
-import { line_best_fit } from './general_lib.js';
+import { line_best_fit, std } from './general_lib.js';
 import { Curve } from '../obj/graph.js';
 
 /**
@@ -11,6 +11,9 @@ import { Curve } from '../obj/graph.js';
  * 
  * @param {float[]} data Data to find MA of 
  * @param {int} window_size Window size for MA
+ *
+ * @returns The simple moving average, which is the same
+ * size as the original data set. The front is padded.
  */
 export function moving_average (data, window_size) {
   let ma = [];
@@ -128,4 +131,49 @@ export function macd (prices, period_1, period_2) {
   }  
 
   return [macd, ema_1, ema_2];
+}
+
+/**
+ * Finds the upper and lower Bollinger Bands of a price curve,
+ * using a simple moving average over the typical price (TP).
+ * 
+ * @param {float[][]} price_data Coinbase API candle data in the format
+ * [ time, low, high, open, close, volume ]
+ * @param {int} n The number of days in the smoothing period, usually 20
+ * @param {int} m The number of standard deviations, usually 2
+ * 
+ * @returns [
+ *  UBOL The upper Bollinger Band
+ *  LBOL The lower Bollinger Band
+ * ]
+ */
+export function BG_bands (price_data, n = 20, m = 2) {
+  // Calculate the typical price, TP
+  let TP = [];
+
+  for (let idx = 0; idx < price_data.num_points; idx++) {
+    TP.push((price_data[idx][2] + price_data[idx][1] + price_data[idx][3])/3); // Typical price [(High + Low + Close)/3]
+  }
+
+  // Find the standard deviation over the last n periods of TP
+  let sigma = std(TP);
+
+  // Find the moving average of the TP
+  let MA = moving_average(TP, n);
+
+  // Now calculate the upper and lower Bollinger Bands
+  let UBOL = new Curve();
+  let LBOL = new Curve();
+
+  for (let idx = 0; idx < price_data.num_points; idx++) {
+    UBOL.add_point (
+      price_data[idx][0],
+      MA[idx] + m*sigma
+    );
+    LBOL.add_point (
+      price_data[idx][0],
+      MA[idx] - m*sigma
+    );
+  }
+  return [UBOL, LBOL];
 }
