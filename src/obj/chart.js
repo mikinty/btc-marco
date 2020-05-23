@@ -446,6 +446,10 @@ class Chart {
       this.clear_chart(key);
     }
 
+    if (this.show_axes) {
+      this.draw_axes();
+    }
+
     for (const [key, value] of this.curves.entries()) {
       if (value.curve instanceof Line) {
         this.draw_line(value.curve, value.color, value.line_width, value.context, value.layer_name);
@@ -456,11 +460,7 @@ class Chart {
           this.draw_curve(value.curve, value.color, value.line_width, value.context, value.layer_name);
         }
       }
-    }
-
-    if (this.show_axes) {
-      this.draw_axes();
-    }
+    }    
   }
 }
 

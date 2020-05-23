@@ -3,7 +3,7 @@
  * @author mikinty
  */
 
-import { exp_moving_average, support_resistance, macd } from './lib/analysis_lib.js';
+import { exp_moving_average, support_resistance, macd, rsi } from './lib/analysis_lib.js';
 import { derivative, local_optima, line_best_fit } from './lib/general_lib.js';
 import { predict_price } from './lib/prediction_lib.js';
 import { Line, Curve } from './obj/graph.js';
@@ -28,7 +28,12 @@ function draw_trendline (price, chart) {
  * @param {*} data The data to analyze, formatted as
  * [ time, low, high, open, close, volume ]
  */
-export function analysis (data, chart_price, chart_analysis, chart_indicator) {
+export function analysis (
+  data, 
+  chart_price, 
+  chart_indicator_top, 
+  chart_indicator_bot
+) {
   const LOW_IDX = 1;
   const HIGH_IDX = 2;
 
@@ -71,10 +76,10 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
   let price_ma_2 = new Curve(mid_price.x, price_ma_2_y);
   let macd_diff = new Curve(mid_price.x, macd_diff_y);
   
-  chart_analysis.plot_curve(price_ma_1, `ema_${MACD_PERIOD_1}`, CONST.BLUE_LIGHT, CONST.LINE_WIDTH_MEDIUM);
-  chart_analysis.plot_curve(price_ma_2, `ema_${MACD_PERIOD_2}`, CONST.ORANGE_BITCOIN, CONST.LINE_WIDTH_MEDIUM);
+  chart_indicator_top.plot_curve(price_ma_1, `ema_${MACD_PERIOD_1}`, CONST.BLUE_LIGHT, CONST.LINE_WIDTH_MEDIUM);
+  chart_indicator_top.plot_curve(price_ma_2, `ema_${MACD_PERIOD_2}`, CONST.ORANGE_BITCOIN, CONST.LINE_WIDTH_MEDIUM);
 
-  chart_analysis.set_context({}, 'macd_bar');
+  chart_indicator_top.set_context({}, 'macd_bar');
 
   // Separate positive and negative macd diffs
   let macd_diff_pn = [new Curve(), new Curve()];
@@ -92,7 +97,7 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
     }
   }
 
-  chart_analysis.plot_curve (
+  chart_indicator_top.plot_curve (
     macd_diff_pn[0], 
     'macd_diff_p', 
     CONST.GREEN_SHREK, 
@@ -103,7 +108,7 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
     CONST.CHART_STYLE_BAR
   );
   
-  chart_analysis.plot_curve (
+  chart_indicator_top.plot_curve (
     macd_diff_pn[1], 
     'macd_diff_n', 
     CONST.RED_CHINA, 
@@ -114,31 +119,45 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
     CONST.CHART_STYLE_BAR
   );
 
-  chart_analysis.plot_line(
+  chart_indicator_top.plot_line(
     new Line(0, 0), 
     'x_axis', 
     CONST.WHITE, 
     CONST.LINE_WIDTH_THIN, 
     'macd_bar', 
     CONST.CHART_LAYER_AXES, 
-    CONST.DEFAULT_CHART_LAYER_AXES
+    CONST.CHART_LAYER_AXES
   );
 
-  // Derivative
-  chart_indicator.plot_curve (
-    price_dv[0], 
-    'derivative', 
+  let rsi_data = rsi(data, 13);
+
+  console.log(rsi_data);
+
+  // RSI
+  chart_indicator_bot.add_layer(CONST.CHART_LAYER_OVERLAY);
+  chart_indicator_bot.plot_curve (
+    rsi_data, 
+    'RSI', 
     CONST.PURPLE_BARNEY, 
     CONST.LINE_WIDTH_MEDIUM
   );
 
-  chart_indicator.plot_line (
-    new Line(0, 0), 
-    'x_axis', 
+  chart_indicator_bot.plot_line (
+    new Line(0, 20), 
+    'rsi_low', 
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_THIN, 
+    CONST.CHART_CONTEXT_DEFAULT,
+    CONST.CHART_LAYER_OVERLAY
+  );
+
+  chart_indicator_bot.plot_line (
+    new Line(0, 80), 
+    'rsi_high', 
     CONST.WHITE, 
     CONST.LINE_WIDTH_THIN, 
     CONST.CHART_CONTEXT_DEFAULT, 
-    CONST.DEFAULT_CHART_LAYER_AXES
+    CONST.CHART_LAYER_OVERLAY
   );
 
   let [line_support, line_resistance] = support_resistance(mid_price, price_opt);
@@ -178,14 +197,16 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
   chart_price.set_context({
     x_high: future_date
   });
-  chart_analysis.set_context({
+  chart_indicator_top.set_context({
     x_high: future_date
   });
-  chart_analysis.set_context({
+  chart_indicator_top.set_context({
     x_high: future_date
   }, 'macd_bar');
-  chart_indicator.set_context({
-    x_high: future_date
+  chart_indicator_bot.set_context({
+    x_high: future_date,
+    y_low: 0,
+    y_high: 100
   });
 
   let new_prices = predict_price(mid_price, future_date, null);

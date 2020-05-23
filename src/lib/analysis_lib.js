@@ -134,6 +134,74 @@ export function macd (prices, period_1, period_2) {
 }
 
 /**
+ * Calculates the RSI indicator.
+ * @param {*} price_data Data format returned from Coinbase,
+ * [ time, low, high, open, close, volume ]
+ * @param {*} n 
+ */
+export function rsi (price_data, n) {
+  let moves_up = [];
+  let moves_down = [];
+
+  let curr_up = 0;
+  let curr_down = 0;
+  for (let i = 0; i < price_data.length; i++) {
+    console.log(curr_up, curr_down);
+    let closing_change = price_data[i][3] - price_data[i][4];
+
+    if (closing_change < 0) {
+      curr_down += 1;
+    } else if (closing_change > 0) {
+      curr_up += 1;
+    }
+
+    // Remove trailing things from front
+    if (i >= n) {
+      let prev_change = price_data[i - n][3] - price_data[i - n][4];
+
+      if (prev_change < 0) {
+        curr_down -= 1;
+      } else if (prev_change > 0) {
+        curr_up -= 1;
+      }
+    }
+
+    if (i >= n - 1) {
+      moves_up.push(
+        curr_up
+      );
+      moves_down.push(
+        curr_down
+      );
+    } 
+  }
+
+  console.log(moves_up);
+
+  moves_up = exp_moving_average(moves_up, n);
+  moves_down = exp_moving_average(moves_down, n);
+
+  console.log(moves_up);
+
+  let rsi = new Curve();
+
+  for (let i = 0; i < moves_up.length; i++) {
+    // RSI if moves_down = 0
+    let curr_rsi = 100;
+
+    if (moves_down[i] != 0) {
+      curr_rsi = 100 - 100/(1 + moves_up[i]/moves_down[i]);
+    }
+
+    rsi.add_point(
+      price_data[i + n - 1][0],
+      curr_rsi
+    );
+  }
+
+  return rsi;
+}
+/**
  * Finds the upper and lower Bollinger Bands of a price curve,
  * using a simple moving average over the typical price (TP).
  * 
