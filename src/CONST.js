@@ -23,8 +23,12 @@ export const REFRESH_RATE = 200;
 /*** CHART ***/
 export const CHART_WIDTH  = 4096;
 export const CHART_HEIGHT = 2160;
+export const CHART_LAYER_AXES = 'axes';
+export const CHART_LAYER_DEFAULT = 'main';
+export const CHART_LAYER_OVERLAY = 'overlay';
 export const CHART_STYLE_LINE = 'line';
 export const CHART_STYLE_BAR  = 'bar';
+export const CHART_CONTEXT_DEFAULT = 'default';
 /** Chart padding for top and botom, percentage decimal. */
 export const CHART_PADDING = 0.2;
 export const CHART_WRAPPER_CLASS = 'stock_chart';

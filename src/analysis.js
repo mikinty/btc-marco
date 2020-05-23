@@ -13,7 +13,14 @@ function draw_trendline (price, chart) {
   // Draw future trendline
   let line_trendline = line_best_fit(price);
 
-  chart.plot_line(line_trendline, 'trendline-lobf', (line_trendline.m > 0) ? CONST.GREEN_SHREK : CONST.RED_CHINA, CONST.LINE_WIDTH_MEDIUM);
+  chart.plot_line (
+    line_trendline, 
+    'trendline-lobf', 
+    (line_trendline.m > 0) ? CONST.GREEN_SHREK : CONST.RED_CHINA, 
+    CONST.LINE_WIDTH_MEDIUM,
+    CONST.CHART_CONTEXT_DEFAULT,
+    CONST.CHART_LAYER_OVERLAY
+  );
 }
 
 /**
@@ -85,22 +92,86 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
     }
   }
 
-  chart_analysis.plot_curve(macd_diff_pn[0], 'macd_diff_p', CONST.GREEN_SHREK, 3, 0.5, 'macd_bar', CONST.CHART_STYLE_BAR);
-  chart_analysis.plot_curve(macd_diff_pn[1], 'macd_diff_n', CONST.RED_CHINA, 3, 0.5, 'macd_bar', CONST.CHART_STYLE_BAR);
-  chart_analysis.plot_line(new Line(0, 0), 'x_axis', CONST.WHITE, CONST.LINE_WIDTH_THIN, 'macd_bar');
+  chart_analysis.plot_curve (
+    macd_diff_pn[0], 
+    'macd_diff_p', 
+    CONST.GREEN_SHREK, 
+    3, 
+    0.5, 
+    'macd_bar', 
+    CONST.CHART_LAYER_DEFAULT,
+    CONST.CHART_STYLE_BAR
+  );
+  
+  chart_analysis.plot_curve (
+    macd_diff_pn[1], 
+    'macd_diff_n', 
+    CONST.RED_CHINA, 
+    3, 
+    0.5, 
+    'macd_bar', 
+    CONST.CHART_LAYER_DEFAULT,
+    CONST.CHART_STYLE_BAR
+  );
+
+  chart_analysis.plot_line(
+    new Line(0, 0), 
+    'x_axis', 
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_THIN, 
+    'macd_bar', 
+    CONST.CHART_LAYER_AXES, 
+    CONST.DEFAULT_CHART_LAYER_AXES
+  );
 
   // Derivative
-  chart_indicator.plot_curve(price_dv[0], 'derivative', CONST.PURPLE_BARNEY, CONST.LINE_WIDTH_MEDIUM);
-  chart_indicator.plot_line(new Line(0, 0), 'x_axis');
+  chart_indicator.plot_curve (
+    price_dv[0], 
+    'derivative', 
+    CONST.PURPLE_BARNEY, 
+    CONST.LINE_WIDTH_MEDIUM
+  );
+
+  chart_indicator.plot_line (
+    new Line(0, 0), 
+    'x_axis', 
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_THIN, 
+    CONST.CHART_CONTEXT_DEFAULT, 
+    CONST.DEFAULT_CHART_LAYER_AXES
+  );
 
   let [line_support, line_resistance] = support_resistance(mid_price, price_opt);
   
-  chart_price.plot_line(line_support, 'support');
-  chart_price.plot_line(line_resistance, 'resistance');
+  chart_price.plot_line (
+    line_support, 
+    'support', 
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_MEDIUM, 
+    CONST.CHART_CONTEXT_DEFAULT, 
+    CONST.CHART_LAYER_OVERLAY
+  );
+
+  chart_price.plot_line ( 
+    line_resistance, 
+    'resistance',
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_MEDIUM, 
+    CONST.CHART_CONTEXT_DEFAULT, 
+    CONST.CHART_LAYER_OVERLAY
+  );
 
   /*** PLOT TA on price chart ***/
   draw_trendline(mid_price, chart_price);
-  chart_price.plot_curve(price_ma, 'price_ma', CONST.ORANGE_BITCOIN, CONST.LINE_WIDTH_THICK);
+  chart_price.plot_curve (
+    price_ma, 
+    'price_ma', 
+    CONST.ORANGE_BITCOIN, 
+    CONST.LINE_WIDTH_THICK,
+    0,
+    CONST.CHART_CONTEXT_DEFAULT,
+    CONST.CHART_LAYER_OVERLAY
+  );
 
   /*** PREDICT PRICES ***/
   let future_date = mid_price.x[mid_price.num_points - 1] + 5000;
@@ -118,5 +189,13 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
   });
 
   let new_prices = predict_price(mid_price, future_date, null);
-  chart_price.plot_curve(new_prices, 'prediction', CONST.PURPLE_BARNEY, 5);
+  chart_price.plot_curve(
+    new_prices, 
+    'prediction', 
+    CONST.PURPLE_BARNEY, 
+    5,
+    0,
+    CONST.CHART_CONTEXT_DEFAULT,
+    CONST.CHART_LAYER_OVERLAY
+  );
 }
