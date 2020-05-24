@@ -3,7 +3,7 @@
  * @author mikinty
  */
 
-import { exp_moving_average, support_resistance, macd } from './lib/analysis_lib.js';
+import { exp_moving_average, support_resistance, macd, rsi, BG_bands } from './lib/analysis_lib.js';
 import { derivative, local_optima, line_best_fit } from './lib/general_lib.js';
 import { predict_price } from './lib/prediction_lib.js';
 import { Line, Curve } from './obj/graph.js';
@@ -13,7 +13,14 @@ function draw_trendline (price, chart) {
   // Draw future trendline
   let line_trendline = line_best_fit(price);
 
-  chart.plot_line(line_trendline, 'trendline-lobf', (line_trendline.m > 0) ? CONST.GREEN_SHREK : CONST.RED_CHINA, CONST.LINE_WIDTH_MEDIUM);
+  chart.plot_line (
+    line_trendline, 
+    'trendline-lobf', 
+    (line_trendline.m > 0) ? CONST.GREEN_SHREK : CONST.RED_CHINA, 
+    CONST.LINE_WIDTH_MEDIUM,
+    CONST.CHART_CONTEXT_DEFAULT,
+    CONST.CHART_LAYER_OVERLAY
+  );
 }
 
 /**
@@ -21,7 +28,12 @@ function draw_trendline (price, chart) {
  * @param {*} data The data to analyze, formatted as
  * [ time, low, high, open, close, volume ]
  */
-export function analysis (data, chart_price, chart_analysis, chart_indicator) {
+export function analysis (
+  data, 
+  chart_price, 
+  chart_indicator_top, 
+  chart_indicator_bot
+) {
   const LOW_IDX = 1;
   const HIGH_IDX = 2;
 
@@ -51,6 +63,36 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
   ma_dv.push(derivative(price_ma));
   let ma_opt = local_optima(ma_dv[0]);
 
+  // Bollinger Bands
+  let bg_bands = BG_bands(data);
+
+  chart_price.add_layer('highlight');
+  chart_price.plot_curve (
+    bg_bands[0],
+    'bg_top', 
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_THIN
+  );
+
+  chart_price.plot_curve (
+    bg_bands[1],
+    'bg_bot', 
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_THIN,
+  );
+
+  chart_price.highlight_curve (
+    bg_bands[1], 
+    bg_bands[0], 
+    'bg_highlight',
+    CONST.YELLOW_LIGHT,
+    0.2,
+    CONST.CHART_CONTEXT_DEFAULT,
+    'highlight'
+  );
+
+  console.log(chart_price.curves);
+
   // MACD
   const MACD_PERIOD_1 = 12;
   const MACD_PERIOD_2 = 26;
@@ -64,10 +106,10 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
   let price_ma_2 = new Curve(mid_price.x, price_ma_2_y);
   let macd_diff = new Curve(mid_price.x, macd_diff_y);
   
-  chart_analysis.plot_curve(price_ma_1, `ema_${MACD_PERIOD_1}`, CONST.BLUE_LIGHT, CONST.LINE_WIDTH_MEDIUM);
-  chart_analysis.plot_curve(price_ma_2, `ema_${MACD_PERIOD_2}`, CONST.ORANGE_BITCOIN, CONST.LINE_WIDTH_MEDIUM);
+  chart_indicator_top.plot_curve(price_ma_1, `ema_${MACD_PERIOD_1}`, CONST.BLUE_LIGHT, CONST.LINE_WIDTH_MEDIUM);
+  chart_indicator_top.plot_curve(price_ma_2, `ema_${MACD_PERIOD_2}`, CONST.ORANGE_BITCOIN, CONST.LINE_WIDTH_MEDIUM);
 
-  chart_analysis.set_context({}, 'macd_bar');
+  chart_indicator_top.set_context({}, 'macd_bar');
 
   // Separate positive and negative macd diffs
   let macd_diff_pn = [new Curve(), new Curve()];
@@ -85,38 +127,126 @@ export function analysis (data, chart_price, chart_analysis, chart_indicator) {
     }
   }
 
-  chart_analysis.plot_curve(macd_diff_pn[0], 'macd_diff_p', CONST.GREEN_SHREK, 3, 0.5, 'macd_bar', CONST.CHART_STYLE_BAR);
-  chart_analysis.plot_curve(macd_diff_pn[1], 'macd_diff_n', CONST.RED_CHINA, 3, 0.5, 'macd_bar', CONST.CHART_STYLE_BAR);
-  chart_analysis.plot_line(new Line(0, 0), 'x_axis', CONST.WHITE, CONST.LINE_WIDTH_THIN, 'macd_bar');
+  chart_indicator_top.plot_curve (
+    macd_diff_pn[0], 
+    'macd_diff_p', 
+    CONST.GREEN_SHREK, 
+    3, 
+    0.5, 
+    'macd_bar', 
+    CONST.CHART_LAYER_DEFAULT,
+    CONST.CHART_STYLE_BAR
+  );
+  
+  chart_indicator_top.plot_curve (
+    macd_diff_pn[1], 
+    'macd_diff_n', 
+    CONST.RED_CHINA, 
+    3, 
+    0.5, 
+    'macd_bar', 
+    CONST.CHART_LAYER_DEFAULT,
+    CONST.CHART_STYLE_BAR
+  );
 
-  // Derivative
-  chart_indicator.plot_curve(price_dv[0], 'derivative', CONST.PURPLE_BARNEY, CONST.LINE_WIDTH_MEDIUM);
-  chart_indicator.plot_line(new Line(0, 0), 'x_axis');
+  chart_indicator_top.plot_line(
+    new Line(0, 0), 
+    'x_axis', 
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_THIN, 
+    'macd_bar', 
+    CONST.CHART_LAYER_AXES, 
+    CONST.CHART_LAYER_AXES
+  );
+
+  let rsi_data = rsi(data, 13);
+
+  console.log(rsi_data);
+
+  // RSI
+  chart_indicator_bot.add_layer(CONST.CHART_LAYER_OVERLAY);
+  chart_indicator_bot.plot_curve (
+    rsi_data, 
+    'RSI', 
+    CONST.PURPLE_BARNEY, 
+    CONST.LINE_WIDTH_MEDIUM
+  );
+
+  chart_indicator_bot.plot_line (
+    new Line(0, 20), 
+    'rsi_low', 
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_THIN, 
+    CONST.CHART_CONTEXT_DEFAULT,
+    CONST.CHART_LAYER_OVERLAY
+  );
+
+  chart_indicator_bot.plot_line (
+    new Line(0, 80), 
+    'rsi_high', 
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_THIN, 
+    CONST.CHART_CONTEXT_DEFAULT, 
+    CONST.CHART_LAYER_OVERLAY
+  );
 
   let [line_support, line_resistance] = support_resistance(mid_price, price_opt);
   
-  chart_price.plot_line(line_support, 'support');
-  chart_price.plot_line(line_resistance, 'resistance');
+  chart_price.plot_line (
+    line_support, 
+    'support', 
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_MEDIUM, 
+    CONST.CHART_CONTEXT_DEFAULT, 
+    CONST.CHART_LAYER_OVERLAY
+  );
+
+  chart_price.plot_line ( 
+    line_resistance, 
+    'resistance',
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_MEDIUM, 
+    CONST.CHART_CONTEXT_DEFAULT, 
+    CONST.CHART_LAYER_OVERLAY
+  );
 
   /*** PLOT TA on price chart ***/
   draw_trendline(mid_price, chart_price);
-  chart_price.plot_curve(price_ma, 'price_ma', CONST.ORANGE_BITCOIN, CONST.LINE_WIDTH_THICK);
+  chart_price.plot_curve (
+    price_ma, 
+    'price_ma', 
+    CONST.ORANGE_BITCOIN, 
+    CONST.LINE_WIDTH_THICK,
+    0,
+    CONST.CHART_CONTEXT_DEFAULT,
+    CONST.CHART_LAYER_OVERLAY
+  );
 
   /*** PREDICT PRICES ***/
   let future_date = mid_price.x[mid_price.num_points - 1] + 5000;
   chart_price.set_context({
     x_high: future_date
   });
-  chart_analysis.set_context({
+  chart_indicator_top.set_context({
     x_high: future_date
   });
-  chart_analysis.set_context({
+  chart_indicator_top.set_context({
     x_high: future_date
   }, 'macd_bar');
-  chart_indicator.set_context({
-    x_high: future_date
+  chart_indicator_bot.set_context({
+    x_high: future_date,
+    y_low: 0,
+    y_high: 100
   });
 
   let new_prices = predict_price(mid_price, future_date, null);
-  chart_price.plot_curve(new_prices, 'prediction', CONST.PURPLE_BARNEY, 5);
+  chart_price.plot_curve(
+    new_prices, 
+    'prediction', 
+    CONST.PURPLE_BARNEY, 
+    5,
+    0,
+    CONST.CHART_CONTEXT_DEFAULT,
+    CONST.CHART_LAYER_OVERLAY
+  );
 }
