@@ -146,7 +146,6 @@ export function rsi (price_data, n) {
   let curr_up = 0;
   let curr_down = 0;
   for (let i = 0; i < price_data.length; i++) {
-    console.log(curr_up, curr_down);
     let closing_change = price_data[i][3] - price_data[i][4];
 
     if (closing_change < 0) {
@@ -176,12 +175,8 @@ export function rsi (price_data, n) {
     } 
   }
 
-  console.log(moves_up);
-
   moves_up = exp_moving_average(moves_up, n);
   moves_down = exp_moving_average(moves_down, n);
-
-  console.log(moves_up);
 
   let rsi = new Curve();
 
@@ -201,6 +196,7 @@ export function rsi (price_data, n) {
 
   return rsi;
 }
+
 /**
  * Finds the upper and lower Bollinger Bands of a price curve,
  * using a simple moving average over the typical price (TP).
@@ -219,7 +215,7 @@ export function BG_bands (price_data, n = 20, m = 2) {
   // Calculate the typical price, TP
   let TP = [];
 
-  for (let idx = 0; idx < price_data.num_points; idx++) {
+  for (let idx = 0; idx < price_data.length; idx++) {
     TP.push((price_data[idx][2] + price_data[idx][1] + price_data[idx][3])/3); // Typical price [(High + Low + Close)/3]
   }
 
@@ -233,7 +229,7 @@ export function BG_bands (price_data, n = 20, m = 2) {
   let UBOL = new Curve();
   let LBOL = new Curve();
 
-  for (let idx = 0; idx < price_data.num_points; idx++) {
+  for (let idx = 0; idx < price_data.length; idx++) {
     UBOL.add_point (
       price_data[idx][0],
       MA[idx] + m*sigma

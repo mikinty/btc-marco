@@ -3,7 +3,7 @@
  * @author mikinty
  */
 
-import { exp_moving_average, support_resistance, macd, rsi } from './lib/analysis_lib.js';
+import { exp_moving_average, support_resistance, macd, rsi, BG_bands } from './lib/analysis_lib.js';
 import { derivative, local_optima, line_best_fit } from './lib/general_lib.js';
 import { predict_price } from './lib/prediction_lib.js';
 import { Line, Curve } from './obj/graph.js';
@@ -62,6 +62,36 @@ export function analysis (
   let ma_dv = [];
   ma_dv.push(derivative(price_ma));
   let ma_opt = local_optima(ma_dv[0]);
+
+  // Bollinger Bands
+  let bg_bands = BG_bands(data);
+
+  chart_price.add_layer('highlight');
+  chart_price.plot_curve (
+    bg_bands[0],
+    'bg_top', 
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_THIN
+  );
+
+  chart_price.plot_curve (
+    bg_bands[1],
+    'bg_bot', 
+    CONST.WHITE, 
+    CONST.LINE_WIDTH_THIN,
+  );
+
+  chart_price.highlight_curve (
+    bg_bands[1], 
+    bg_bands[0], 
+    'bg_highlight',
+    CONST.YELLOW_LIGHT,
+    0.2,
+    CONST.CHART_CONTEXT_DEFAULT,
+    'highlight'
+  );
+
+  console.log(chart_price.curves);
 
   // MACD
   const MACD_PERIOD_1 = 12;

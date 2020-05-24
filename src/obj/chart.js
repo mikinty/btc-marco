@@ -367,6 +367,63 @@ class Chart {
     }
   }
 
+  highlight_curve (
+    curve_bot,
+    curve_top, 
+    name, 
+    color = CONST.YELLOW_LIGHT, 
+    opacity = 0.3,
+    context_name = CONST.CHART_CONTEXT_DEFAULT, 
+    layer_name = CONST.CHART_LAYER_OVERLAY
+  ) {
+    if (curve_bot.num_points != curve_top.num_points) {
+      throw new Error('[chart.js] Cannot highlight between curves of unequal length.');
+    }
+
+    let context = this.context.get(context_name);
+    let canvas = this.layers.get(layer_name);
+    
+    // Plotting 
+    let ctx = canvas.getContext('2d');
+
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = opacity;
+    ctx.lineWidth = 10; // Thick enough to cover gaps
+
+    ctx.beginPath();
+    for (let idx = 0; idx < curve_bot.num_points; idx++) {
+      // Translate points to this chart object's context
+      let curr_x = this.get_context_x(context, curve_bot.x[idx], canvas);
+      let curr_y_bot = this.get_context_y(context, curve_bot.y[idx], canvas);
+      let curr_y_top = this.get_context_y(context, curve_top.y[idx], canvas);
+
+      if (idx == 0) {
+        ctx.moveTo(curr_x, curr_y_bot);
+        ctx.lineTo(curr_x, curr_y_top);
+      } else {
+        ctx.lineTo(curr_x, curr_y_bot);
+        ctx.lineTo(curr_x, curr_y_top);
+      }
+      
+    }
+    ctx.stroke();
+
+    if (name != null) {
+      this.curves.set(
+        name, 
+        {
+          'curve': curve_bot,
+          'curve_top': curve_top,
+          'color': color,
+          'opacity': opacity,
+          'context_name': context_name,
+          'chart_style': CONST.CHART_STYLE_HIGHLIGHT,
+          'layer_name': layer_name
+        }
+      );
+    }
+  }
+
   /*** LOWER LEVEL PLOTTING FUNCTIONS. Not intended for use by outside user. ***/
   draw_line (line, color, line_width, context, layer_name) {
     // Make sure we don't plot below the axis
@@ -456,6 +513,9 @@ class Chart {
       } else if (value.curve instanceof Curve) {
         if (value.chart_style == CONST.CHART_STYLE_BAR) {
           this.draw_bar(value.curve, value.color, value.line_width, value.context, value.layer_name);
+        } else if (value.chart_style == CONST.CHART_STYLE_HIGHLIGHT) {
+          console.log('redraw highlightS');
+          this.highlight_curve(value.curve, value.curve_top, null, value.color, value.opacity, value.context_name, value.layer_name);
         } else {
           this.draw_curve(value.curve, value.color, value.line_width, value.context, value.layer_name);
         }

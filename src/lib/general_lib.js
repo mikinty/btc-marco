@@ -66,7 +66,6 @@ export function line_best_fit (points) {
 }
 
 export function std (points) {
-
   let mean = (points.reduce((a, b) => a + b, 0))/points.length;
   let diff_s = [];
 
@@ -75,5 +74,6 @@ export function std (points) {
 
   }
   let sum_diff_s = (diff_s.reduce((a, b) => a + b, 0))/(diff_s.length - 1);
-  return sigma = Math.sqrt(sum_diff_s);
+
+  return Math.sqrt(sum_diff_s);
 }
