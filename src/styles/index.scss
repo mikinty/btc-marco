@@ -1,0 +1,32 @@
+/**
+ * For the main page, body
+ */
+
+@import './constants.scss';
+
+html, body {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  background-color: $bg_color_1;
+
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+// For wide-screen devices
+body {
+  max-width: 850px;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  height: 10%;
+  width: 90%;
+}

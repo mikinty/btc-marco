@@ -6,7 +6,15 @@
  */
 
 /** Ticker we are analyzing */
-export const TICKER = 'BTC-USD';
+export const DEFAULT_TICKER = 'BTC-USD';
+export const TICKER_LIST = [
+  'BTC-USD',
+  'ETH-USD',
+  'LTC-USD',
+  'XTZ-USD',
+  'LINK-USD'
+];
+
 /** The base url for all Coinbase API requests */
 const COINBASE_URL = `https:\/\/api.pro.coinbase.com\/products\/`;
 /** Constructs request URLs */
@@ -18,7 +26,7 @@ export const CHART_TIME_HRS = 6;
 /** Granularity for the chart as defined by the Coinbase Pro API */
 export const GRANULARITY = [60, 300, 900, 3600, 21600, 86400][1];
 /** Price refresh rate (in ms) */
-export const REFRESH_RATE = 200;
+export const REFRESH_RATE = 500;
 
 /*** CHART ***/
 export const CHART_WIDTH  = 4096;

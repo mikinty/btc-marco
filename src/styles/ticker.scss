@@ -1,0 +1,65 @@
+/**
+ * Ticker and popup
+ */
+
+@import './constants.scss';
+
+@keyframes green_flash {
+  from {color: rgb(52, 202, 52);}
+  to {color: white;}
+}
+
+@keyframes red_flash {
+  from {color: rgb(231, 58, 53);}
+  to {color: white;}
+}
+
+.text {
+  font-size: 24px;
+  transition: color 0.5s ease;
+  color: white;
+  animation-duration: 0.5s;
+  cursor: pointer;
+}
+
+.ticker_popup_wrapper {
+  margin-top: 12px;
+
+  .ticker_popup {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    z-index: $z_top;
+
+    background-color: $bg_color_1;
+    border: 2px solid $border_color;
+
+    .ticker_option {
+      color: white;
+      margin: 6px;
+      width: 150px;
+      text-align: center;
+      background-color: $bg_color_2;
+
+      cursor: pointer;
+
+      &:hover {
+        background-color: $bg_color_2_sel;
+      }
+
+      div {
+        margin: 8px;
+      }
+    }
+  }
+}
+
+.update_green {
+  animation-name: green_flash;
+}
+
+.update_red {
+  animation-name: red_flash;
+}

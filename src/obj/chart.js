@@ -67,6 +67,33 @@ class Chart {
   }
 
   /**
+   * Resets the chart, deletes all the curves, layers, contexts.
+   */
+  reset () {
+    // Clear all layers
+    for (const [key, value] of this.layers) {
+      this.clear_chart(key);
+    }
+
+    this.context = new Map();
+    this.context.set(
+      CONST.CHART_CONTEXT_DEFAULT, 
+      {
+        x_low:  null,
+        x_high: null,
+        y_low:  null,
+        y_high: null
+      }
+    );
+
+    this.curves = new Map();
+
+    this.layers = new Map();
+    this.add_layer(CONST.CHART_LAYER_AXES);
+    this.add_layer(CONST.CHART_LAYER_DEFAULT);
+  }
+
+  /**
    * Creates an additional layer on the canvas
    * @param {string} name Label for chart layer 
    */
