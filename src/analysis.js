@@ -239,7 +239,12 @@ export function analysis (
     y_high: 100
   });
 
-  let new_prices = predict_price(mid_price, future_date, null);
+  let chart_price_context = 
+  chart_price.context.get(CONST.CHART_CONTEXT_DEFAULT);
+
+  let random_noise = (chart_price_context.y_high - chart_price_context.y_low)/10;
+
+  let new_prices = predict_price(mid_price, future_date, null, random_noise);
   chart_price.plot_curve(
     new_prices, 
     'prediction', 
