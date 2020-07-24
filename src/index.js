@@ -5,23 +5,20 @@ import { Chart } from './obj/chart.js';
 import { Curve } from './obj/graph.js';
 import * as CONST from './CONST.js';
 
-const name_text = document.createElement('span');
-name_text.classList.add('text');
-name_text.innerHTML = 'Price:';
-
-function component() {
-  const element = document.createElement('div');
-  element.classList.add('main');
-
-  element.appendChild(name_text);
-  
-  return element;
-}
-
 /**
  * Initialization for the app. Creates the charts, fetches initial data.
  */
 async function init () {
+  const name_text = document.createElement('span');
+  name_text.classList.add('text');
+
+  const main_container = document.createElement('div');
+  main_container.classList.add('main');
+
+  main_container.appendChild(name_text);
+
+  document.body.appendChild(main_container);
+
   let chart_price = new Chart (
     CONST.CHART_WIDTH, 
     CONST.CHART_HEIGHT, 
@@ -67,5 +64,4 @@ async function init () {
   request_again(name_text);
 }
 
-document.body.appendChild(component());
 init();
