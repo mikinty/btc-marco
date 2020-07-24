@@ -20,6 +20,7 @@ async function init () {
   name_text.innerHTML = CONST.DEFAULT_TICKER;
 
   /** Ticker popup **/
+  const ticker_wrapper = document.createElement('div');
   const ticker_popup_wrapper = document.createElement('div');
   const ticker_popup = document.createElement('div');
 
@@ -27,13 +28,19 @@ async function init () {
   ticker_popup_wrapper.style.display = 'none';
   ticker_popup.classList.add('ticker_popup');
 
+  ticker_wrapper.appendChild(name_text);
+  ticker_wrapper.appendChild(ticker_popup_wrapper);
+  ticker_popup_wrapper.appendChild(ticker_popup);
+
+  /** Timescale **/
+  const timescale_wrapper = document.createElement('div');
+
   /** Main container **/
   const main_container = document.createElement('div');
   main_container.classList.add('main');
 
-  main_container.appendChild(name_text);
-  main_container.appendChild(ticker_popup_wrapper);
-  ticker_popup_wrapper.appendChild(ticker_popup);
+  main_container.appendChild(ticker_wrapper);
+  main_container.appendChild(timescale_wrapper);
 
   document.body.appendChild(main_container);
 
@@ -65,6 +72,7 @@ async function init () {
 
   plot_ticker (
     CONST.DEFAULT_TICKER, 
+    CONST.TIMESCALE_LIST[3],
     name_text, 
     chart_price, 
     chart_indicator_top, 
@@ -88,13 +96,14 @@ async function init () {
  */
 export async function plot_ticker (
   ticker,
+  timescale,
   name_text,
   chart_price,
   chart_indicator_top,
   chart_indicator_bot
 ) {
   // Draws the charts
-  let data_response = await get_past_prices(ticker);
+  let data_response = await get_past_prices(ticker, timescale);
   let price_data = data_response.map(elem => (elem[1] + elem[2])/2);
   let time_data = data_response.map(elem => elem[0]);
 

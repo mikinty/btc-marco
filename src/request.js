@@ -7,17 +7,18 @@ import *  as CONST from './CONST.js';
 
 /**
  * Retrieves price data from the Coinbase API
+ * 
+ * @param ticker Ticker to get prices of
+ * @param timescale Timescale object to calculate timeframe
  */
-export async function get_past_prices (ticker) {
+export async function get_past_prices (ticker, timescale) {
   let curr_time = new Date();
-  let end_iso = curr_time.toISOString();
-  curr_time.setHours(curr_time.getHours() - CONST.CHART_TIME_HRS);
   
   return $.ajax(
     CONST.REQUEST_CANDLE_URL(ticker),
     {
-      'start': curr_time.toISOString(),
-      'end': end_iso,
+      'start': timescale.start_time(curr_time),
+      'end': curr_time.toISOString(),
       'granularity': CONST.GRANULARITY
     }
   );
