@@ -7,6 +7,14 @@
 
 /** Ticker we are analyzing */
 export const DEFAULT_TICKER = 'BTC-USD';
+export const TICKER_LIST = [
+  'BTC-USD',
+  'ETH-USD',
+  'LTC-USD',
+  'XTZ-USD',
+  'LINK-USD'
+];
+
 /** The base url for all Coinbase API requests */
 const COINBASE_URL = `https:\/\/api.pro.coinbase.com\/products\/`;
 /** Constructs request URLs */

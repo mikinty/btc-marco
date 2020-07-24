@@ -29,14 +29,30 @@
     position: absolute;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    width: 300px;
-    height: 500px;
+    align-items: center;
 
     z-index: $z_top;
 
     background-color: $bg_color_1;
     border: 2px solid $border_color;
+
+    .ticker_option {
+      color: white;
+      margin: 6px;
+      width: 150px;
+      text-align: center;
+      background-color: $bg_color_2;
+
+      cursor: pointer;
+
+      &:hover {
+        background-color: $bg_color_2_sel;
+      }
+
+      div {
+        margin: 8px;
+      }
+    }
   }
 }
 

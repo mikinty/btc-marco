@@ -22,6 +22,7 @@ async function init () {
   const ticker_popup = document.createElement('div');
 
   ticker_popup_wrapper.classList.add('ticker_popup_wrapper');
+  ticker_popup_wrapper.style.display = 'none';
   ticker_popup.classList.add('ticker_popup');
 
   init_ticker(name_text, ticker_popup_wrapper, ticker_popup);
