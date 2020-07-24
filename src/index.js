@@ -6,6 +6,8 @@ import { Chart } from './obj/chart.js';
 import { Curve } from './obj/graph.js';
 import * as CONST from './CONST.js';
 
+export var curr_interval = undefined;
+
 /**
  * Initialization for the app. Creates the charts, fetches initial data.
  */
@@ -24,8 +26,6 @@ async function init () {
   ticker_popup_wrapper.classList.add('ticker_popup_wrapper');
   ticker_popup_wrapper.style.display = 'none';
   ticker_popup.classList.add('ticker_popup');
-
-  init_ticker(name_text, ticker_popup_wrapper, ticker_popup);
 
   /** Main container **/
   const main_container = document.createElement('div');
@@ -60,10 +60,41 @@ async function init () {
     CONST.CHART_WRAPPER_CLASS_INDICATOR,
     true
   );
+
   document.body.appendChild(chart_indicator_bot.chart_wrapper);
 
+  plot_ticker (
+    CONST.DEFAULT_TICKER, 
+    name_text, 
+    chart_price, 
+    chart_indicator_top, 
+    chart_indicator_bot
+  );
+
+  // Fires off ticker popup setup
+  init_ticker (
+    name_text, 
+    ticker_popup_wrapper, 
+    ticker_popup,
+    chart_price, 
+    chart_indicator_top, 
+    chart_indicator_bot
+  );
+}
+
+/**
+ * Plots the ticker and analysis on the charts. 
+ * @param {string} ticker Ticker to plot. Must be valid in the Coinbase API
+ */
+export async function plot_ticker (
+  ticker,
+  name_text,
+  chart_price,
+  chart_indicator_top,
+  chart_indicator_bot
+) {
   // Draws the charts
-  let data_response = await get_past_prices(CONST.DEFAULT_TICKER);
+  let data_response = await get_past_prices(ticker);
   let price_data = data_response.map(elem => (elem[1] + elem[2])/2);
   let time_data = data_response.map(elem => elem[0]);
 
@@ -79,8 +110,12 @@ async function init () {
 
   analysis(data_response, chart_price, chart_indicator_top, chart_indicator_bot);
 
+  // Save this ticker value
+  name_text.value = ticker;
+
   // Kicks off price fetching
-  request_again(name_text, CONST.DEFAULT_TICKER);
+  curr_interval = request_again(name_text, ticker);
 }
 
+// Startup the app
 init();

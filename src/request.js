@@ -30,7 +30,7 @@ export async function get_past_prices (ticker) {
 export function request_again (elem, ticker) {
   let prev_price = -1;
 
-  setInterval (
+  return setInterval (
     () => {
       $.ajax(
         CONST.REQUEST_TICKER_URL(ticker)
