@@ -8,13 +8,13 @@ import *  as CONST from './CONST.js';
 /**
  * Retrieves price data from the Coinbase API
  */
-export async function get_past_prices () {
+export async function get_past_prices (ticker) {
   let curr_time = new Date();
   let end_iso = curr_time.toISOString();
   curr_time.setHours(curr_time.getHours() - CONST.CHART_TIME_HRS);
   
   return $.ajax(
-    CONST.REQUEST_CANDLE_URL(CONST.TICKER),
+    CONST.REQUEST_CANDLE_URL(ticker),
     {
       'start': curr_time.toISOString(),
       'end': end_iso,
@@ -27,15 +27,15 @@ export async function get_past_prices () {
  * Starts periodic request to update the price
  * @param {*} elem Price ticker object
  */
-export function request_again (elem) {
+export function request_again (elem, ticker) {
   let prev_price = -1;
 
   setInterval (
     () => {
       $.ajax(
-        CONST.REQUEST_TICKER_URL(CONST.TICKER)
+        CONST.REQUEST_TICKER_URL(ticker)
       ).then(data => {
-        elem.innerHTML = `${CONST.TICKER}: $${data.price}`;
+        elem.innerHTML = `${ticker}: $${data.price}`;
 
         if (prev_price != -1) {
           let delta = data.price - prev_price;
