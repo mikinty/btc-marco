@@ -42,9 +42,6 @@ export function init_timescale (
         chart_indicator_bot.reset();
         chart_indicator_top.reset();
 
-        // Stop updating the old ticker
-        clearInterval(INDEX_STATE.curr_interval);
-
         // Set the new timescale
         INDEX_STATE.curr_timescale = CONST.TIMESCALE_LIST[i];
 

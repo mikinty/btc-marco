@@ -10,7 +10,6 @@ import * as CONST from './CONST.js';
 /*** STATE VARIABLES ***/
 /** The current interval updating the price */
 export var INDEX_STATE = {
-  curr_interval: undefined,
   curr_ticker: CONST.DEFAULT_TICKER,
   curr_timescale: CONST.DEFAULT_TIMESCALE
 };
@@ -105,6 +104,9 @@ async function init () {
     chart_indicator_top, 
     chart_indicator_bot
   );
+
+  // Kicks off price fetching
+  request_again(name_text);
 }
 
 /**
@@ -122,8 +124,6 @@ export async function plot_ticker (
   // Draws the charts
   let data_response = await get_past_prices(ticker, timescale);
 
-  console.log(data_response[data_response.length -1]);
-
   // Average out the data
   let price_data = data_response.map(elem => (elem[1] + elem[2])/2);
   let time_data = data_response.map(elem => elem[0]);
@@ -139,9 +139,6 @@ export async function plot_ticker (
   chart_price.add_layer(CONST.CHART_LAYER_OVERLAY);
 
   analysis(data_response, chart_price, chart_indicator_top, chart_indicator_bot);
-
-  // Kicks off price fetching
-  INDEX_STATE.curr_interval = request_again(name_text, ticker);
 }
 
 // Startup the app

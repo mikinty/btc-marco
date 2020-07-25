@@ -2,16 +2,9 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const OUTPUT_PATH = 'build';
 
 module.exports = {
-  mode: 'development',
   entry: './src/index.js',
-  devtool: 'inline-source-map',
-  devServer: {
-    contentBase: './build',
-    openPage: 'btc-marco/'
-  },
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
@@ -20,16 +13,16 @@ module.exports = {
     }),
     new webpack.ProvidePlugin({
       $: 'jquery',
-      jQuery: 'jquery',
-    }),
+      jQuery: 'jquery'
+    })
   ],
   output: {
-    filename: 'bundle.js',
+    filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'build'),
     publicPath: '/btc-marco/'
   },
   node: {
-    fs: "empty"
+    fs: 'empty'
   },
   module: {
     rules: [
@@ -53,15 +46,15 @@ module.exports = {
       {
         test: /\.(png|svg|jpg|gif)$/,
         use: [
-          'file-loader',
-        ],
+          'file-loader'
+        ]
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
         use: [
-          'file-loader',
+          'file-loader'
         ]
       }
-    ],
-  },
+    ]
+  }
 };
