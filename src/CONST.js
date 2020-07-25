@@ -80,6 +80,8 @@ export const TIMESCALE_LIST = [
     granularity: GRANULARITY_LIST[5]
   }
 ];
+/** The default timescale we start with */
+export const DEFAULT_TIMESCALE = TIMESCALE_LIST[3];
 /** How much price history to look at */
 export const CHART_TIME_HRS = 6;
 /** Price refresh rate (in ms) */

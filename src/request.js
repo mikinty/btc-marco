@@ -4,6 +4,7 @@
  */
 
 import *  as CONST from './CONST.js';
+import { INDEX_STATE } from './index.js';
 
 /**
  * Retrieves price data from the Coinbase API
@@ -11,17 +12,21 @@ import *  as CONST from './CONST.js';
  * @param ticker Ticker to get prices of
  * @param timescale Timescale object to calculate timeframe
  */
-export async function get_past_prices (ticker, timescale) {
+export async function get_past_prices (
+  ticker = INDEX_STATE.curr_ticker, 
+  timescale = INDEX_STATE.curr_timescale 
+) {
   let curr_time = new Date();
+  let end_string = curr_time.toISOString();
   
-  return $.ajax(
-    CONST.REQUEST_CANDLE_URL(ticker),
-    {
-      'start': timescale.start_time(curr_time),
-      'end': curr_time.toISOString(),
-      'granularity': CONST.GRANULARITY
+  return $.ajax({
+    url: CONST.REQUEST_CANDLE_URL(ticker),
+    data: {
+      start: timescale.start_time(curr_time),
+      end: end_string,
+      granularity: timescale.granularity
     }
-  );
+  });
 }
 
 /**

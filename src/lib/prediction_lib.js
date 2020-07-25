@@ -3,6 +3,7 @@
  * @author mikinty
  */
 
+import { INDEX_STATE } from '../index.js';
 import { line_best_fit } from './general_lib.js';
 import * as CONST from '../CONST.js';
 import { Curve } from '../obj/graph.js';
@@ -23,7 +24,8 @@ export function predict_price (prices, end_time, input, noise = 15) {
   let curr_y = start_point[1];
 
   // Generate new points
-  for (let t = start_point[0]; t <= end_time; t += CONST.GRANULARITY) {
+  let curr_granularity = INDEX_STATE.curr_timescale.granularity;
+  for (let t = start_point[0]; t <= end_time; t += curr_granularity) {
     new_prices[0].push(
       t
     );
@@ -33,7 +35,7 @@ export function predict_price (prices, end_time, input, noise = 15) {
     );
 
     // Calculate new point
-    curr_y += line_best.m * CONST.GRANULARITY + noise*(Math.random() - 0.5);
+    curr_y += line_best.m * curr_granularity + noise*(Math.random() - 0.5);
   }
 
   return new Curve (
