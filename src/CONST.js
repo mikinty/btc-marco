@@ -105,6 +105,7 @@ export const LINE_WIDTH_THIN = 5;
 export const LINE_WIDTH_MEDIUM = 7;
 export const LINE_WIDTH_THICK = 10;
 export const LINE_WIDTH_XXXTRA_THIQQ = 15;
+export const CHART_HIGHLIGHT_THICKNESS = 50;
 
 /*** COLORS ***/
 export const BLUE_LIGHT = '#33ECFF';

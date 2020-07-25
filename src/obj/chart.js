@@ -415,7 +415,7 @@ class Chart {
 
     ctx.strokeStyle = color;
     ctx.globalAlpha = opacity;
-    ctx.lineWidth = 20; // Thick enough to cover gaps
+    ctx.lineWidth = CONST.CHART_HIGHLIGHT_THICKNESS; // Thick enough to cover gaps
 
     ctx.beginPath();
     for (let idx = 0; idx < curve_bot.num_points; idx++) {
