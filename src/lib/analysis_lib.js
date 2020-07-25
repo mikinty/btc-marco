@@ -46,6 +46,10 @@ export function moving_average (data, window_size) {
  * @param {int} window_size Window size for EMA
  */
 export function exp_moving_average (data, window_size) {
+  if (data.length < 1) {
+    return data;
+  }
+
   let ma = [];
   let k = 2/(window_size + 1);
 
