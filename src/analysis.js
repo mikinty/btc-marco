@@ -78,7 +78,7 @@ export function analysis (
     bg_bands[1],
     'bg_bot', 
     CONST.WHITE, 
-    CONST.LINE_WIDTH_THIN,
+    CONST.LINE_WIDTH_THIN
   );
 
   chart_price.highlight_curve (

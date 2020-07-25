@@ -5,6 +5,7 @@
   },
   "rules": {
     "indent": ["error", 2],
-    "semi": "error"
+    "semi": "error",
+    "comma-dangle": "error"
   }
 }
