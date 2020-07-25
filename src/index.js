@@ -10,7 +10,6 @@ import * as CONST from './CONST.js';
 /*** STATE VARIABLES ***/
 /** The current interval updating the price */
 export var INDEX_STATE = {
-  curr_interval: undefined,
   curr_ticker: CONST.DEFAULT_TICKER,
   curr_timescale: CONST.DEFAULT_TIMESCALE
 };
@@ -105,6 +104,9 @@ async function init () {
     chart_indicator_top, 
     chart_indicator_bot
   );
+
+  // Kicks off price fetching
+  request_again(name_text);
 }
 
 /**
@@ -139,9 +141,6 @@ export async function plot_ticker (
   chart_price.add_layer(CONST.CHART_LAYER_OVERLAY);
 
   analysis(data_response, chart_price, chart_indicator_top, chart_indicator_bot);
-
-  // Kicks off price fetching
-  INDEX_STATE.curr_interval = request_again(name_text, ticker);
 }
 
 // Startup the app

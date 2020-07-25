@@ -46,9 +46,6 @@ export function init_ticker (
         chart_indicator_bot.reset();
         chart_indicator_top.reset();
 
-        // Stop updating the old ticker
-        clearInterval(INDEX_STATE.curr_interval);
-
         // Update the new ticker
         INDEX_STATE.curr_ticker = CONST.TICKER_LIST[i];
 
