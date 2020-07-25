@@ -1,0 +1,26 @@
+/**
+ * Timescale components
+ */
+
+@import './constants.scss';
+
+.timescale_wrapper {
+  color: white;
+  display: flex;
+  flex-direction: row;
+  margin-left: auto;
+
+  .timescale_icon {
+    margin: 6px;
+    cursor: pointer;
+
+    &:hover {
+      color: $ORANGE_BITCOIN; 
+    }
+
+    &.timescale_select {
+      color: $ORANGE_BITCOIN; 
+      border-bottom: 2px solid $ORANGE_BITCOIN;
+    }
+  }
+}

@@ -4,23 +4,29 @@
  */
 
 import *  as CONST from './CONST.js';
+import { INDEX_STATE } from './index.js';
 
 /**
  * Retrieves price data from the Coinbase API
+ * 
+ * @param ticker Ticker to get prices of
+ * @param timescale Timescale object to calculate timeframe
  */
-export async function get_past_prices (ticker) {
+export async function get_past_prices (
+  ticker = INDEX_STATE.curr_ticker, 
+  timescale = INDEX_STATE.curr_timescale 
+) {
   let curr_time = new Date();
-  let end_iso = curr_time.toISOString();
-  curr_time.setHours(curr_time.getHours() - CONST.CHART_TIME_HRS);
+  let end_string = curr_time.toISOString();
   
-  return $.ajax(
-    CONST.REQUEST_CANDLE_URL(ticker),
-    {
-      'start': curr_time.toISOString(),
-      'end': end_iso,
-      'granularity': CONST.GRANULARITY
+  return $.ajax({
+    url: CONST.REQUEST_CANDLE_URL(ticker),
+    data: {
+      start: timescale.start_time(curr_time),
+      end: end_string,
+      granularity: timescale.granularity
     }
-  );
+  });
 }
 
 /**
@@ -35,7 +41,7 @@ export function request_again (elem, ticker) {
       $.ajax(
         CONST.REQUEST_TICKER_URL(ticker)
       ).then(data => {
-        elem.innerHTML = `${ticker}: $${data.price}`;
+        elem.innerHTML = `${ticker}: $${Number(data.price).toFixed(2)}`;
 
         if (prev_price != -1) {
           let delta = data.price - prev_price;

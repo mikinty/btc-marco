@@ -91,8 +91,6 @@ export function analysis (
     'highlight'
   );
 
-  console.log(chart_price.curves);
-
   // MACD
   const MACD_PERIOD_1 = 12;
   const MACD_PERIOD_2 = 26;
@@ -161,8 +159,6 @@ export function analysis (
 
   let rsi_data = rsi(data, 13);
 
-  console.log(rsi_data);
-
   // RSI
   chart_indicator_bot.add_layer(CONST.CHART_LAYER_OVERLAY);
   chart_indicator_bot.plot_curve (
@@ -223,7 +219,11 @@ export function analysis (
   );
 
   /*** PREDICT PRICES ***/
-  let future_date = mid_price.x[mid_price.num_points - 1] + 5000;
+
+  // Set how much space to leave forward to plot
+  let date_range = mid_price.x[mid_price.num_points - 1] - mid_price.x[0];
+  let future_date = mid_price.x[mid_price.num_points - 1] + date_range*0.2;
+
   chart_price.set_context({
     x_high: future_date
   });

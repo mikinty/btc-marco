@@ -3,7 +3,7 @@
  */
 
 import * as CONST from '../CONST.js';
-import { plot_ticker, curr_interval } from '../index.js';
+import { plot_ticker, INDEX_STATE } from '../index.js';
 
 /** 
  * Sets up the ticker popup
@@ -40,18 +40,22 @@ export function init_ticker (
     curr_ticker_sel.onclick = () => {
       ticker_popup_wrapper.style.display = 'none';
 
-      if (name_text.value != CONST.TICKER_LIST[i]) {
+      if (INDEX_STATE.curr_ticker != CONST.TICKER_LIST[i]) {
         // Reset the plots
         chart_price.reset();
         chart_indicator_bot.reset();
         chart_indicator_top.reset();
-        console.log(chart_price);
 
-        clearInterval(curr_interval);
+        // Stop updating the old ticker
+        clearInterval(INDEX_STATE.curr_interval);
+
+        // Update the new ticker
+        INDEX_STATE.curr_ticker = CONST.TICKER_LIST[i];
 
         // Plot the new ticker
         plot_ticker (
           CONST.TICKER_LIST[i], 
+          INDEX_STATE.curr_timescale,
           name_text,
           chart_price, 
           chart_indicator_top, 

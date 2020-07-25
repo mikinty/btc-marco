@@ -1,12 +1,19 @@
 import './styles/main.scss';
 import { init_ticker } from './components/ticker.js';
+import { init_timescale } from './components/timescale.js';
 import { get_past_prices, request_again } from './request.js';
 import { analysis } from './analysis.js';
 import { Chart } from './obj/chart.js';
 import { Curve } from './obj/graph.js';
 import * as CONST from './CONST.js';
 
-export var curr_interval = undefined;
+/*** STATE VARIABLES ***/
+/** The current interval updating the price */
+export var INDEX_STATE = {
+  curr_interval: undefined,
+  curr_ticker: CONST.DEFAULT_TICKER,
+  curr_timescale: CONST.DEFAULT_TIMESCALE
+};
 
 /**
  * Initialization for the app. Creates the charts, fetches initial data.
@@ -20,6 +27,7 @@ async function init () {
   name_text.innerHTML = CONST.DEFAULT_TICKER;
 
   /** Ticker popup **/
+  const ticker_wrapper = document.createElement('div');
   const ticker_popup_wrapper = document.createElement('div');
   const ticker_popup = document.createElement('div');
 
@@ -27,13 +35,20 @@ async function init () {
   ticker_popup_wrapper.style.display = 'none';
   ticker_popup.classList.add('ticker_popup');
 
+  ticker_wrapper.appendChild(name_text);
+  ticker_wrapper.appendChild(ticker_popup_wrapper);
+  ticker_popup_wrapper.appendChild(ticker_popup);
+
+  /** Timescale **/
+  const timescale_wrapper = document.createElement('div');
+  timescale_wrapper.classList.add('timescale_wrapper');
+
   /** Main container **/
   const main_container = document.createElement('div');
   main_container.classList.add('main');
 
-  main_container.appendChild(name_text);
-  main_container.appendChild(ticker_popup_wrapper);
-  ticker_popup_wrapper.appendChild(ticker_popup);
+  main_container.appendChild(ticker_wrapper);
+  main_container.appendChild(timescale_wrapper);
 
   document.body.appendChild(main_container);
 
@@ -65,6 +80,7 @@ async function init () {
 
   plot_ticker (
     CONST.DEFAULT_TICKER, 
+    CONST.DEFAULT_TIMESCALE,
     name_text, 
     chart_price, 
     chart_indicator_top, 
@@ -80,6 +96,15 @@ async function init () {
     chart_indicator_top, 
     chart_indicator_bot
   );
+
+  // Options to change the chart timescale
+  init_timescale (
+    timescale_wrapper,
+    name_text,
+    chart_price, 
+    chart_indicator_top, 
+    chart_indicator_bot
+  );
 }
 
 /**
@@ -88,13 +113,18 @@ async function init () {
  */
 export async function plot_ticker (
   ticker,
+  timescale,
   name_text,
   chart_price,
   chart_indicator_top,
   chart_indicator_bot
 ) {
   // Draws the charts
-  let data_response = await get_past_prices(ticker);
+  let data_response = await get_past_prices(ticker, timescale);
+
+  console.log(data_response[data_response.length -1]);
+
+  // Average out the data
   let price_data = data_response.map(elem => (elem[1] + elem[2])/2);
   let time_data = data_response.map(elem => elem[0]);
 
@@ -110,11 +140,8 @@ export async function plot_ticker (
 
   analysis(data_response, chart_price, chart_indicator_top, chart_indicator_bot);
 
-  // Save this ticker value
-  name_text.value = ticker;
-
   // Kicks off price fetching
-  curr_interval = request_again(name_text, ticker);
+  INDEX_STATE.curr_interval = request_again(name_text, ticker);
 }
 
 // Startup the app
