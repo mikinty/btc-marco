@@ -124,8 +124,6 @@ export async function plot_ticker (
   // Draws the charts
   let data_response = await get_past_prices(ticker, timescale);
 
-  console.log(data_response[data_response.length -1]);
-
   // Average out the data
   let price_data = data_response.map(elem => (elem[1] + elem[2])/2);
   let time_data = data_response.map(elem => elem[0]);

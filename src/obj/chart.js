@@ -541,7 +541,6 @@ class Chart {
         if (value.chart_style == CONST.CHART_STYLE_BAR) {
           this.draw_bar(value.curve, value.color, value.line_width, value.context, value.layer_name);
         } else if (value.chart_style == CONST.CHART_STYLE_HIGHLIGHT) {
-          console.log('redraw highlightS');
           this.highlight_curve(value.curve, value.curve_top, null, value.color, value.opacity, value.context_name, value.layer_name);
         } else {
           this.draw_curve(value.curve, value.color, value.line_width, value.context, value.layer_name);
