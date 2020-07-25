@@ -36,7 +36,7 @@ export function request_again (elem, ticker) {
       $.ajax(
         CONST.REQUEST_TICKER_URL(ticker)
       ).then(data => {
-        elem.innerHTML = `${ticker}: $${data.price}`;
+        elem.innerHTML = `${ticker}: $${Number(data.price).toFixed(2)}`;
 
         if (prev_price != -1) {
           let delta = data.price - prev_price;
